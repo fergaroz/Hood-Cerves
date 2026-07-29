@@ -149,8 +149,33 @@ header.app-header {
 
 .export-row {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin: -8px 0 16px;
+  flex-wrap: wrap;
+}
+
+.notif-btn {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--paper);
+  background: #2a2c2e;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+
+.notif-btn:disabled {
+  opacity: 0.5;
+}
+
+.notif-status {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: #999;
 }
 
 .export-row a {

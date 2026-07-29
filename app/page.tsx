@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { AddPersonForm } from "@/components/AddPersonForm";
+import { NotificationButton } from "@/components/NotificationButton";
 import { PersonCard } from "@/components/PersonCard";
 import { TotalCounter } from "@/components/TotalCounter";
 import type { PersonWithTotal } from "@/lib/types";
@@ -35,11 +36,11 @@ export default function Home() {
     await refresh();
   }
 
-  async function handleDrink(personId: string, liters: number) {
+  async function handleDrink(personId: string, liters: number, label?: string) {
     await fetch(`/api/people/${personId}/drink`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ liters }),
+      body: JSON.stringify({ liters, label }),
     });
     await refresh();
   }
@@ -75,6 +76,7 @@ export default function Home() {
       <TotalCounter totalLiters={totalLiters} />
 
       <div className="export-row">
+        <NotificationButton />
         <a href="/api/export" download>
           Exportar a Excel
         </a>

@@ -21,7 +21,7 @@ export function PersonCard({
 }: {
   person: PersonWithTotal;
   maxLiters: number;
-  onDrink: (personId: string, liters: number) => Promise<void>;
+  onDrink: (personId: string, liters: number, label?: string) => Promise<void>;
   onUndo: (personId: string) => Promise<void>;
   onDelete: (personId: string) => Promise<void>;
 }) {
@@ -30,11 +30,11 @@ export function PersonCard({
 
   const ratio = maxLiters > 0 ? person.totalLiters / maxLiters : 0;
 
-  async function addDrink(liters: number) {
+  async function addDrink(liters: number, label?: string) {
     if (busy) return;
     setBusy(true);
     try {
-      await onDrink(person.id, liters);
+      await onDrink(person.id, liters, label);
     } finally {
       setBusy(false);
     }
@@ -76,7 +76,7 @@ export function PersonCard({
             <button
               key={size.label}
               disabled={busy}
-              onClick={() => addDrink(size.liters)}
+              onClick={() => addDrink(size.liters, size.label)}
             >
               {size.label} ({size.liters}L)
             </button>

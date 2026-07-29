@@ -39,10 +39,9 @@ pasos funcionan enteramente desde el navegador.
 3. Sigue el asistente (elige la región más cercana, por ejemplo Europa) y
    créala.
 4. Cuando te lo pida, pulsa **Connect** para conectarla a tu proyecto
-   `hood-cerves`. Esto añade automáticamente las variables de entorno
-   `POSTGRES_PRISMA_URL` y `POSTGRES_URL_NON_POOLING` que usa el proyecto
-   (ya están referenciadas en `prisma/schema.prisma`), no hay que tocar nada
-   más.
+   `hood-cerves`. Esto añade automáticamente la variable de entorno
+   `DATABASE_URL` que usa el proyecto (ya está referenciada en
+   `prisma/schema.prisma`), no hay que tocar nada más.
 
 ## 4. Despliega
 
@@ -60,16 +59,32 @@ En iPhone (Safari): abre la URL, pulsa el botón compartir y luego
 "Añadir a pantalla de inicio". En Android (Chrome): abre la URL y usa el
 menú "Añadir a pantalla de inicio" / "Instalar app".
 
-## Sobre el logo
+## 6. Notificaciones push (opcional pero ya integrado en el código)
 
-No tenía el archivo `hood-cerves-logo.png`, así que la cabecera y los iconos
-usan un logo placeholder ("HC" en un círculo). Para poner el logo real:
+Cada vez que alguien apunta una bebida, todos los que hayan activado las
+notificaciones (botón "🔔 Activar notificaciones" en la web) reciben un
+aviso tipo "¡Fernando se acaba de tomar: Pinta!".
 
-1. Sustituye `public/icons/icon-192.png` y `public/icons/icon-512.png` por
-   tus propios iconos cuadrados (192x192 y 512x512 px).
-2. En `app/page.tsx`, cambia el `<svg>` dentro de `.logo-circle` por una
-   etiqueta `<img src="/logo.png" alt="Hood Cerves" />` una vez subas tu
-   `logo.png` a la carpeta `public/`.
+**Importante en iPhone**: por restricción de Apple, las notificaciones push
+solo funcionan si la web está añadida a la pantalla de inicio (paso 5) — en
+una pestaña normal de Safari no llegan. En Android/Chrome funcionan también
+sin instalarla.
+
+Para activarlo, añade estas variables de entorno en tu proyecto de Vercel
+(**Settings → Environment Variables**, para Production y Preview):
+
+```
+VAPID_PUBLIC_KEY=BNfygOHC4VMYrG1SItW7nFiA57y0Qpa78ItnVL7e9elfTLjpV-zMCY8YZphcAjoQ7hkStS1GtmsWz5nw-8Fa1YQ
+VAPID_PRIVATE_KEY=9-HxBJ-_YN994PVNAkhoNITd__H7vbrhJL09MoFBmOg
+VAPID_SUBJECT=mailto:tu-email@ejemplo.com
+NEXT_PUBLIC_VAPID_PUBLIC_KEY=BNfygOHC4VMYrG1SItW7nFiA57y0Qpa78ItnVL7e9elfTLjpV-zMCY8YZphcAjoQ7hkStS1GtmsWz5nw-8Fa1YQ
+```
+
+(`NEXT_PUBLIC_VAPID_PUBLIC_KEY` debe tener el mismo valor que
+`VAPID_PUBLIC_KEY` — una es para el servidor y otra para el navegador).
+Cambia `VAPID_SUBJECT` por un email de contacto real tuyo, no se muestra a
+nadie, es solo un requisito técnico del protocolo push. Después de añadir
+las variables, vuelve a desplegar (Redeploy) para que se apliquen.
 
 ## Desarrollo local
 

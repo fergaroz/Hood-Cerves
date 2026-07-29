@@ -16,11 +16,12 @@ export async function GET() {
     orderBy: { createdAt: "asc" },
   });
 
-  const header = ["Nombre", "Litros", "Fecha", "Hora"];
+  const header = ["Nombre", "Tipo", "Litros", "Fecha", "Hora"];
   const rows = drinks.map((d) => {
     const date = new Date(d.createdAt);
     return [
       d.person.name,
+      d.label ?? "",
       d.liters.toFixed(2).replace(".", ","),
       date.toLocaleDateString("es-ES"),
       date.toLocaleTimeString("es-ES"),
