@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Anton, Barlow_Condensed } from "next/font/google";
+import { Luckiest_Guy, Barlow_Condensed } from "next/font/google";
 import "./globals.css";
 
-const anton = Anton({
+const luckiestGuy = Luckiest_Guy({
   subsets: ["latin"],
   weight: "400",
   variable: "--font-display",
@@ -43,7 +43,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className={`${anton.variable} ${barlow.variable}`}>
+      <body className={`${luckiestGuy.variable} ${barlow.variable}`}>
         {children}
       </body>
     </html>

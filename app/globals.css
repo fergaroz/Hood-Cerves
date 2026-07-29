@@ -88,33 +88,28 @@ header.app-header {
 
 .title-wrap h1 {
   font-family: var(--font-display);
+  font-weight: 400;
   font-size: clamp(2.2rem, 9vw, 3.4rem);
   line-height: 1;
   margin: 0;
   letter-spacing: 1px;
   color: #fff;
+  -webkit-text-stroke: 2px #000;
+  paint-order: stroke fill;
   position: relative;
   z-index: 2;
 }
 
-.title-wrap h1::before,
-.title-wrap h1::after {
+.title-wrap h1::before {
   content: "HOOD CERVES";
   position: absolute;
   left: 0;
   top: 0;
-  z-index: 1;
-}
-
-.title-wrap h1::before {
-  color: var(--pink);
-  transform: translate(3px, 3px);
-}
-
-.title-wrap h1::after {
-  color: var(--orange);
-  transform: translate(-3px, -3px);
-  z-index: 0;
+  z-index: -1;
+  color: #c81e1e;
+  -webkit-text-stroke: 2px #000;
+  paint-order: stroke fill;
+  transform: translate(4px, 4px);
 }
 
 .subtitle {

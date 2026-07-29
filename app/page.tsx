@@ -61,25 +61,14 @@ export default function Home() {
     <main>
       <header className="app-header">
         <div className="logo-circle">
-          <svg viewBox="0 0 64 64" width="100%" height="100%">
-            <rect width="64" height="64" fill="#17181a" />
-            <text
-              x="32"
-              y="40"
-              textAnchor="middle"
-              fontFamily="Anton, sans-serif"
-              fontSize="22"
-              fill="#f2b705"
-            >
-              HC
-            </text>
-          </svg>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.jpg" alt="Hood Cerves" />
         </div>
         <div>
           <div className="title-wrap">
             <h1>HOOD CERVES</h1>
           </div>
-          <p className="subtitle">Marcador de litros del grupo</p>
+          <p className="subtitle">Marcador de birras del Hood</p>
         </div>
       </header>
 
