@@ -68,11 +68,17 @@ export default function Home() {
           <div className="title-wrap">
             <h1>HOOD CERVES</h1>
           </div>
-          <p className="subtitle">Marcador de birras del Hood</p>
+          <p className="subtitle">Marcador de birras de Hood</p>
         </div>
       </header>
 
       <TotalCounter totalLiters={totalLiters} />
+
+      <div className="export-row">
+        <a href="/api/export" download>
+          Exportar a Excel
+        </a>
+      </div>
 
       <AddPersonForm onAdd={handleAdd} />
 

@@ -147,6 +147,26 @@ header.app-header {
   color: #fff;
 }
 
+.export-row {
+  display: flex;
+  justify-content: flex-end;
+  margin: -8px 0 16px;
+}
+
+.export-row a {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--yellow);
+  text-decoration: none;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.export-row a:hover {
+  color: var(--pink);
+}
+
 .add-person {
   display: flex;
   gap: 8px;
