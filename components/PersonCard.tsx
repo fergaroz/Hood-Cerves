@@ -2,25 +2,20 @@
 
 import { useState } from "react";
 import { BeerJar } from "./BeerJar";
+import { QUICK_SIZES } from "@/lib/quickSizes";
 import type { PersonWithTotal } from "@/lib/types";
-
-const QUICK_SIZES = [
-  { label: "Botellín", liters: 0.2 },
-  { label: "Tercio", liters: 0.33 },
-  { label: "Pinta", liters: 0.5 },
-  { label: "Copa Mayri", liters: 0.4 },
-  { label: "Litrona", liters: 1 },
-];
 
 export function PersonCard({
   person,
   maxLiters,
+  isLeader,
   onDrink,
   onUndo,
   onDelete,
 }: {
   person: PersonWithTotal;
   maxLiters: number;
+  isLeader: boolean;
   onDrink: (personId: string, liters: number, label?: string) => Promise<void>;
   onUndo: (personId: string) => Promise<void>;
   onDelete: (personId: string) => Promise<void>;
@@ -68,7 +63,10 @@ export function PersonCard({
         <BeerJar ratio={ratio} />
       </div>
       <div className="info-col">
-        <p className="person-name">{person.name}</p>
+        <p className="person-name">
+          {person.name}
+          {isLeader && <span className="crown">👑</span>}
+        </p>
         <p className="person-total">{person.totalLiters.toFixed(2)} L</p>
 
         <div className="quick-buttons">

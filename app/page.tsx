@@ -58,6 +58,13 @@ export default function Home() {
   const totalLiters = people.reduce((sum, p) => sum + p.totalLiters, 0);
   const maxLiters = people.reduce((max, p) => Math.max(max, p.totalLiters), 0);
 
+  const normalize = (n: number) => Math.round(n * 100);
+  const maxNormalized = normalize(maxLiters);
+  const leadersCount = people.filter(
+    (p) => normalize(p.totalLiters) === maxNormalized
+  ).length;
+  const hasSingleLeader = maxNormalized > 0 && leadersCount === 1;
+
   return (
     <main>
       <header className="app-header">
@@ -94,6 +101,7 @@ export default function Home() {
             key={person.id}
             person={person}
             maxLiters={maxLiters}
+            isLeader={hasSingleLeader && normalize(person.totalLiters) === maxNormalized}
             onDrink={handleDrink}
             onUndo={handleUndo}
             onDelete={handleDelete}

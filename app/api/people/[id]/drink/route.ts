@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { broadcastPush } from "@/lib/push";
+import { resolveLabel } from "@/lib/quickSizes";
 
 export const dynamic = "force-dynamic";
 
@@ -10,7 +11,7 @@ export async function POST(
 ) {
   const body = await req.json().catch(() => null);
   const liters = Number(body?.liters);
-  const label = typeof body?.label === "string" ? body.label.slice(0, 40) : null;
+  const rawLabel = typeof body?.label === "string" ? body.label.slice(0, 40) : null;
 
   if (!Number.isFinite(liters) || liters <= 0 || liters > 5) {
     return NextResponse.json(
@@ -18,6 +19,8 @@ export async function POST(
       { status: 400 }
     );
   }
+
+  const label = resolveLabel(liters, rawLabel);
 
   const [drink, person] = await Promise.all([
     prisma.drink.create({
@@ -27,10 +30,9 @@ export async function POST(
   ]);
 
   if (person) {
-    const what = label ? label : `${liters}L`;
     await broadcastPush({
       title: "Hood Cerves",
-      body: `¡${person.name} se acaba de tomar: ${what}!`,
+      body: `¡${person.name} se acaba de tomar: ${label}!`,
     }).catch(() => null);
   }
 
