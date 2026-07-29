@@ -15,8 +15,9 @@ function urlBase64ToUint8Array(base64String: string) {
 
 export function NotificationButton() {
   const [status, setStatus] = useState<
-    "unsupported" | "idle" | "subscribing" | "subscribed" | "denied"
+    "unsupported" | "idle" | "subscribing" | "subscribed" | "denied" | "error"
   >("idle");
+  const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
@@ -36,7 +37,13 @@ export function NotificationButton() {
 
   async function handleEnable() {
     const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
-    if (!vapidPublicKey) return;
+    if (!vapidPublicKey) {
+      setStatus("error");
+      setErrorMessage(
+        "Falta configurar NEXT_PUBLIC_VAPID_PUBLIC_KEY en Vercel."
+      );
+      return;
+    }
 
     setStatus("subscribing");
 
@@ -53,19 +60,30 @@ export function NotificationButton() {
         applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
       });
 
-      await fetch("/api/push/subscribe", {
+      const res = await fetch("/api/push/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(subscription),
       });
 
+      if (!res.ok) {
+        throw new Error(`El servidor respondió ${res.status}`);
+      }
+
       setStatus("subscribed");
-    } catch {
-      setStatus("idle");
+    } catch (err) {
+      setStatus("error");
+      setErrorMessage(err instanceof Error ? err.message : String(err));
     }
   }
 
-  if (status === "unsupported") return null;
+  if (status === "unsupported") {
+    return (
+      <span className="notif-status">
+        🔕 Este navegador no soporta notificaciones aquí
+      </span>
+    );
+  }
 
   if (status === "subscribed") {
     return <span className="notif-status">🔔 Notificaciones activadas</span>;
@@ -75,6 +93,17 @@ export function NotificationButton() {
     return (
       <span className="notif-status">
         🔕 Notificaciones bloqueadas (actívalas en los ajustes del navegador)
+      </span>
+    );
+  }
+
+  if (status === "error") {
+    return (
+      <span className="notif-status notif-error">
+        ⚠️ Error: {errorMessage}{" "}
+        <button className="notif-retry" onClick={handleEnable}>
+          Reintentar
+        </button>
       </span>
     );
   }

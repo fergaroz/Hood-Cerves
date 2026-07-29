@@ -178,6 +178,22 @@ header.app-header {
   color: #999;
 }
 
+.notif-error {
+  color: var(--pink);
+}
+
+.notif-retry {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.8rem;
+  color: var(--yellow);
+  background: none;
+  border: none;
+  text-decoration: underline;
+  cursor: pointer;
+  padding: 0;
+}
+
 .export-row a {
   font-family: var(--font-body);
   font-weight: 600;
