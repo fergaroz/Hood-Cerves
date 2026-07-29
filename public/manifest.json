@@ -1,0 +1,21 @@
+{
+  "name": "Hood Cerves",
+  "short_name": "Hood Cerves",
+  "description": "Marcador grupal de litros de cerveza",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#17181a",
+  "theme_color": "#17181a",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

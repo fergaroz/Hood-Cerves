@@ -1,0 +1,51 @@
+import type { Metadata, Viewport } from "next";
+import { Anton, Barlow_Condensed } from "next/font/google";
+import "./globals.css";
+
+const anton = Anton({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-display",
+});
+
+const barlow = Barlow_Condensed({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-body",
+});
+
+export const metadata: Metadata = {
+  title: "HOOD CERVES",
+  description: "Marcador grupal de litros de cerveza",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "Hood Cerves",
+  },
+  icons: {
+    icon: "/icons/icon-192.png",
+    apple: "/icons/icon-192.png",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#17181a",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="es">
+      <body className={`${anton.variable} ${barlow.variable}`}>
+        {children}
+      </body>
+    </html>
+  );
+}
