@@ -86,6 +86,34 @@ Cambia `VAPID_SUBJECT` por un email de contacto real tuyo, no se muestra a
 nadie, es solo un requisito técnico del protocolo push. Después de añadir
 las variables, vuelve a desplegar (Redeploy) para que se apliquen.
 
+## 7. Resumen mensual automático
+
+El día 1 de cada mes a las 9:00 (hora UTC), la app envía un push a todos los
+que tengan notificaciones activadas con el total de litros del grupo en el
+mes anterior y quién ha sido "el borracho del mes" (si no hay empate en el
+primer puesto).
+
+Añade esta variable de entorno en Vercel (**Settings → Environment
+Variables**, Production y Preview):
+
+```
+CRON_SECRET=cYeGwRL_Dp-ruum3CMtpUfVOMu8AYuRHDUqAMGXav0E
+```
+
+Esto protege la ruta para que solo Vercel (o tú, con el secreto) pueda
+disparar el resumen. No hace falta hacer nada más: el archivo `vercel.json`
+ya programa la tarea, Vercel la detecta sola al desplegar.
+
+**Para probarlo manualmente** sin esperar al día 1, abre en el navegador
+(con la web ya desplegada y con al menos una bebida apuntada este mes):
+
+```
+https://TU-URL-DE-VERCEL.vercel.app/api/cron/monthly-report?secret=cYeGwRL_Dp-ruum3CMtpUfVOMu8AYuRHDUqAMGXav0E
+```
+
+Si todo va bien, verás un JSON con `"sent": true` y a quien tenga las
+notificaciones activadas le llegará el aviso al momento.
+
 ## Desarrollo local
 
 Este proyecto no se ha podido instalar/probar localmente porque la máquina
