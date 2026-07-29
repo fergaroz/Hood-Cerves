@@ -305,6 +305,9 @@ header.app-header {
   letter-spacing: 1px;
   cursor: pointer;
   padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
 }
 
 .link-btn.undo {
@@ -312,7 +315,8 @@ header.app-header {
 }
 
 .link-btn.delete {
-  color: #888;
+  color: #e2394b;
+  font-weight: 600;
 }
 
 .link-btn.delete:hover {
