@@ -8,6 +8,7 @@ const QUICK_SIZES = [
   { label: "Botellín", liters: 0.2 },
   { label: "Tercio", liters: 0.33 },
   { label: "Pinta", liters: 0.5 },
+  { label: "Copa Mayri", liters: 0.4 },
   { label: "Litrona", liters: 1 },
 ];
 
@@ -102,10 +103,23 @@ export function PersonCard({
             disabled={busy || !person.lastDrinkId}
             onClick={handleUndo}
           >
+            <svg
+              viewBox="0 0 24 24"
+              width="14"
+              height="14"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M9 14 4 9l5-5" />
+              <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
+            </svg>
             Deshacer última
           </button>
           <button className="link-btn delete" onClick={handleDelete}>
-            Eliminar
+            Eliminar ✕
           </button>
         </div>
       </div>
