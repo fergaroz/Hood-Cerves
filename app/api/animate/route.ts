@@ -15,11 +15,13 @@ export async function POST() {
     return NextResponse.json({ ok: false, onCooldown: true }, { status: 429 });
   }
 
-  await prisma.animateEvent.create({ data: {} });
+  const { template, text } = randomAnimateMessage(last?.message);
+
+  await prisma.animateEvent.create({ data: { message: template } });
 
   await broadcastPush({
     title: "Hood Cerves",
-    body: randomAnimateMessage(),
+    body: text,
   }).catch(() => null);
 
   return NextResponse.json({ ok: true });

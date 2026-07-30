@@ -14,8 +14,17 @@ function currentDayName(): string {
   return new Date().toLocaleDateString("es-ES", { weekday: "long" });
 }
 
-export function randomAnimateMessage(): string {
-  const template =
-    ANIMATE_MESSAGES[Math.floor(Math.random() * ANIMATE_MESSAGES.length)];
-  return template.replace("{dia}", currentDayName());
+export function randomAnimateMessage(excludeTemplate?: string | null): {
+  template: string;
+  text: string;
+} {
+  let pool = ANIMATE_MESSAGES;
+  if (excludeTemplate && ANIMATE_MESSAGES.length > 1) {
+    const filtered = ANIMATE_MESSAGES.filter((m) => m !== excludeTemplate);
+    if (filtered.length > 0) pool = filtered;
+  }
+
+  const template = pool[Math.floor(Math.random() * pool.length)];
+  const text = template.replace("{dia}", currentDayName());
+  return { template, text };
 }
