@@ -32,3 +32,8 @@ model PushSubscription {
   auth      String
   createdAt DateTime @default(now())
 }
+
+model AnimateEvent {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+}

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { AddPersonForm } from "@/components/AddPersonForm";
+import { AnimateButton } from "@/components/AnimateButton";
 import { NotificationButton } from "@/components/NotificationButton";
 import { PersonCard } from "@/components/PersonCard";
 import { TotalCounter } from "@/components/TotalCounter";
@@ -81,6 +82,10 @@ export default function Home() {
       </header>
 
       <TotalCounter totalLiters={totalLiters} />
+
+      <div className="animate-row">
+        <AnimateButton />
+      </div>
 
       <div className="export-row">
         <NotificationButton />
