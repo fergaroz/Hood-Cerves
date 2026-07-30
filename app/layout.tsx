@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Luckiest_Guy, Barlow_Condensed } from "next/font/google";
+import { Luckiest_Guy, Barlow_Condensed, Black_Ops_One } from "next/font/google";
 import "./globals.css";
 
 const luckiestGuy = Luckiest_Guy({
@@ -12,6 +12,12 @@ const barlow = Barlow_Condensed({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   variable: "--font-body",
+});
+
+const blackOpsOne = Black_Ops_One({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-badge",
 });
 
 export const metadata: Metadata = {
@@ -43,7 +49,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className={`${luckiestGuy.variable} ${barlow.variable}`}>
+      <body
+        className={`${luckiestGuy.variable} ${barlow.variable} ${blackOpsOne.variable}`}
+      >
         {children}
       </body>
     </html>

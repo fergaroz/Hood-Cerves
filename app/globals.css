@@ -299,6 +299,20 @@ header.app-header {
   font-size: 1.1rem;
 }
 
+.rank-badge {
+  font-family: var(--font-badge);
+  font-size: 0.7rem;
+  color: var(--yellow);
+  background: #000;
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 0 0 8px;
+  border: 1px solid #3a3c3e;
+}
+
 .person-total {
   color: var(--yellow);
   font-weight: 700;

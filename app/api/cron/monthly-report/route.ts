@@ -49,6 +49,9 @@ export async function GET(req: NextRequest) {
   );
   const topLiters = ranking[0]?.liters ?? 0;
   const winners = ranking.filter((r) => Math.abs(r.liters - topLiters) < 0.005);
+  const bottomLiters = ranking[ranking.length - 1]?.liters ?? 0;
+  const losers = ranking.filter((r) => Math.abs(r.liters - bottomLiters) < 0.005);
+  const hasSpread = Math.abs(topLiters - bottomLiters) >= 0.005;
 
   const monthName = start.toLocaleDateString("es-ES", { month: "long" });
   const formatLiters = (n: number) => n.toFixed(2).replace(".", ",");
@@ -69,6 +72,15 @@ export async function GET(req: NextRequest) {
   body += `\n${namesJoined} ${verb} ${noun} del mes con ${formatLiters(
     topLiters
   )} L de cerveza. 🍺👑`;
+
+  if (hasSpread) {
+    const loserNamesJoined = joinNames(losers.map((l) => l.name));
+    const loserVerb = losers.length > 1 ? "son" : "es";
+    const loserNoun = losers.length > 1 ? "los pussys" : "el pussy";
+    body += `\n${loserNamesJoined} ${loserVerb} ${loserNoun} del mes con ${formatLiters(
+      bottomLiters
+    )} L de cerveza.`;
+  }
 
   await broadcastPush({ title: "Hood Cerves - Resumen mensual", body });
 

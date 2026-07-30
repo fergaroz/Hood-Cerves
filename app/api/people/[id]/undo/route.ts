@@ -27,7 +27,7 @@ export async function POST(
     const what = resolveLabel(lastDrink.liters, lastDrink.label);
     await broadcastPush({
       title: "Hood Cerves",
-      body: `¡${person.name} ha borrado su última bebida (${what}) (vaya maricón)!`,
+      body: `¡${person.name} ha borrado su última bebida 🏳️‍🌈(${what})!`,
     }).catch(() => null);
   }
 

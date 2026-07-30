@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { BeerJar } from "./BeerJar";
 import { QUICK_SIZES } from "@/lib/quickSizes";
+import { getCurrentBadge } from "@/lib/badges";
 import type { PersonWithTotal } from "@/lib/types";
 
 export function PersonCard({
@@ -24,6 +25,7 @@ export function PersonCard({
   const [busy, setBusy] = useState(false);
 
   const ratio = maxLiters > 0 ? person.totalLiters / maxLiters : 0;
+  const badge = getCurrentBadge(person.totalLiters);
 
   async function addDrink(liters: number, label?: string) {
     if (busy) return;
@@ -53,7 +55,12 @@ export function PersonCard({
   }
 
   async function handleDelete() {
-    if (!confirm(`¿Eliminar a ${person.name} del marcador?`)) return;
+    if (
+      !confirm(
+        `¿Seguro que quieres eliminar a ${person.name}? Ya no podrá beber más cerveza.`
+      )
+    )
+      return;
     await onDelete(person.id);
   }
 
@@ -67,6 +74,7 @@ export function PersonCard({
           {person.name}
           {isLeader && <span className="crown">👑</span>}
         </p>
+        {badge && <p className="rank-badge">{badge.name}</p>}
         <p className="person-total">{person.totalLiters.toFixed(2)} L</p>
 
         <div className="quick-buttons">
