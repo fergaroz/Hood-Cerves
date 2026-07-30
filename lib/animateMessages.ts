@@ -5,6 +5,9 @@ export const ANIMATE_MESSAGES = [
   "Una birra?, No seeee broo",
   "Tenemos una teoría sobre Preci 😈",
   "¿Quién una birra?",
+  "Sois maricones o qué, a beber cojones",
+  "Vamos a por una birra mas grande que la cabeza del Tati",
+  "No seeeee brooo ¿Una cerve?",
 ];
 
 function currentDayName(): string {
