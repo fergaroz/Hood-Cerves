@@ -3,4 +3,6 @@ export type PersonWithTotal = {
   name: string;
   totalLiters: number;
   lastDrinkId: string | null;
+  totalCubataLiters: number;
+  lastCubataId: string | null;
 };

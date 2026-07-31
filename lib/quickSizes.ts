@@ -6,8 +6,14 @@ export const QUICK_SIZES = [
   { label: "Litrona", liters: 1 },
 ];
 
-export function resolveLabel(liters: number, providedLabel?: string | null): string {
+export const CUBATA_QUICK_SIZES = [{ label: "Cubata", liters: 0.5 }];
+
+export function resolveLabel(
+  liters: number,
+  providedLabel?: string | null,
+  sizes: { label: string; liters: number }[] = QUICK_SIZES
+): string {
   if (providedLabel) return providedLabel;
-  const match = QUICK_SIZES.find((size) => Math.abs(size.liters - liters) < 0.005);
+  const match = sizes.find((size) => Math.abs(size.liters - liters) < 0.005);
   return match ? match.label : `${liters}L`;
 }

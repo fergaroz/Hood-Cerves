@@ -8,6 +8,7 @@ export const ANIMATE_MESSAGES = [
   "Sois maricones o qué, a beber cojones",
   "Vamos a por una birra mas grande que la cabeza del Tati",
   "No seeeee brooo ¿Una cerve?",
+  "Seguro que Preci está en el Mayri",
 ];
 
 function currentDayName(): string {

@@ -6,7 +6,10 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   const people = await prisma.person.findMany({
-    include: { drinks: { orderBy: { createdAt: "desc" } } },
+    include: {
+      drinks: { orderBy: { createdAt: "desc" } },
+      cubatas: { orderBy: { createdAt: "desc" } },
+    },
     orderBy: { createdAt: "asc" },
   });
 
@@ -15,6 +18,8 @@ export async function GET() {
     name: p.name,
     totalLiters: p.drinks.reduce((sum, d) => sum + d.liters, 0),
     lastDrinkId: p.drinks[0]?.id ?? null,
+    totalCubataLiters: p.cubatas.reduce((sum, c) => sum + c.liters, 0),
+    lastCubataId: p.cubatas[0]?.id ?? null,
   }));
 
   return NextResponse.json(result);
