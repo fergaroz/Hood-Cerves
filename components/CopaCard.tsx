@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { CiderGlass } from "./CiderGlass";
 import { getCurrentBadge } from "@/lib/badges";
+import { CUBATA_QUICK_SIZES } from "@/lib/quickSizes";
 import type { PersonWithTotal } from "@/lib/types";
 
 export function CopaCard({
@@ -72,9 +73,15 @@ export function CopaCard({
         <p className="person-total">{person.totalCubataLiters.toFixed(2)} L</p>
 
         <div className="quick-buttons">
-          <button disabled={busy} onClick={() => addCubata(0.5, "Cubata")}>
-            Cubata (0.5L)
-          </button>
+          {CUBATA_QUICK_SIZES.map((size) => (
+            <button
+              key={size.label}
+              disabled={busy}
+              onClick={() => addCubata(size.liters, size.label)}
+            >
+              {size.label} ({size.liters}L)
+            </button>
+          ))}
         </div>
 
         <div className="custom-amount">

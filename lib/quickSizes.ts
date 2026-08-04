@@ -6,7 +6,10 @@ export const QUICK_SIZES = [
   { label: "Litrona", liters: 1 },
 ];
 
-export const CUBATA_QUICK_SIZES = [{ label: "Cubata", liters: 0.5 }];
+export const CUBATA_QUICK_SIZES = [
+  { label: "Cubata", liters: 0.5 },
+  { label: "Chupitos", liters: 0.3 },
+];
 
 export function resolveLabel(
   liters: number,

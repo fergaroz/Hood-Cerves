@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import ExcelJS from "exceljs";
 import { prisma } from "@/lib/prisma";
+import { formatMadridDate, formatMadridTime, getMadridYearMonth } from "@/lib/madridTime";
 
 export const dynamic = "force-dynamic";
 
@@ -19,34 +20,49 @@ const MONTH_NAMES = [
   "Diciembre",
 ];
 
-export async function GET() {
-  const drinks = await prisma.drink.findMany({
-    include: { person: true },
-    orderBy: { createdAt: "asc" },
-  });
-
-  const workbook = new ExcelJS.Workbook();
-
-  const registro = workbook.addWorksheet("Registro");
-  registro.columns = [
+function addRegistroSheet(
+  workbook: ExcelJS.Workbook,
+  name: string,
+  entries: { person: { name: string }; label: string | null; liters: number; createdAt: Date }[]
+) {
+  const sheet = workbook.addWorksheet(name);
+  sheet.columns = [
     { header: "Nombre", key: "nombre", width: 20 },
     { header: "Tipo", key: "tipo", width: 16 },
     { header: "Litros", key: "litros", width: 10 },
     { header: "Fecha", key: "fecha", width: 14 },
     { header: "Hora", key: "hora", width: 12 },
   ];
-  registro.getRow(1).font = { bold: true };
+  sheet.getRow(1).font = { bold: true };
 
-  for (const d of drinks) {
-    const date = new Date(d.createdAt);
-    registro.addRow({
-      nombre: d.person.name,
-      tipo: d.label ?? "",
-      litros: Number(d.liters.toFixed(2)),
-      fecha: date.toLocaleDateString("es-ES"),
-      hora: date.toLocaleTimeString("es-ES"),
+  for (const entry of entries) {
+    const date = new Date(entry.createdAt);
+    sheet.addRow({
+      nombre: entry.person.name,
+      tipo: entry.label ?? "",
+      litros: Number(entry.liters.toFixed(2)),
+      fecha: formatMadridDate(date),
+      hora: formatMadridTime(date),
     });
   }
+}
+
+export async function GET() {
+  const [drinks, cubatas] = await Promise.all([
+    prisma.drink.findMany({
+      include: { person: true },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.cubata.findMany({
+      include: { person: true },
+      orderBy: { createdAt: "asc" },
+    }),
+  ]);
+
+  const workbook = new ExcelJS.Workbook();
+
+  addRegistroSheet(workbook, "Registro cervezas", drinks);
+  addRegistroSheet(workbook, "Registro cubatas", cubatas);
 
   type MonthlyEntry = {
     year: number;
@@ -57,9 +73,7 @@ export async function GET() {
 
   const monthlyMap = new Map<string, MonthlyEntry>();
   for (const d of drinks) {
-    const date = new Date(d.createdAt);
-    const year = date.getFullYear();
-    const month = date.getMonth();
+    const { year, month } = getMadridYearMonth(new Date(d.createdAt));
     const key = `${year}-${month}-${d.personId}`;
     const entry = monthlyMap.get(key) ?? {
       year,
@@ -78,7 +92,7 @@ export async function GET() {
     return b.liters - a.liters;
   });
 
-  const resumen = workbook.addWorksheet("Resumen mensual");
+  const resumen = workbook.addWorksheet("Resumen mensual cervezas");
   resumen.columns = [
     { header: "Mes", key: "mes", width: 18 },
     { header: "Nombre", key: "nombre", width: 20 },
