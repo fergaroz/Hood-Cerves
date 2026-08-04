@@ -80,8 +80,10 @@ export function PersonCard({
           </span>
         </div>
         {badge && <p className="rank-badge">{badge.name}</p>}
-        <p className="person-total-label">Este mes</p>
-        <p className="person-total">{person.monthLiters.toFixed(2)} L</p>
+        <p className="person-total">
+          {person.monthLiters.toFixed(2)} L
+          <span className="person-total-label">Este mes</span>
+        </p>
 
         <div className="quick-buttons">
           {QUICK_SIZES.map((size) => (
