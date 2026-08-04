@@ -341,6 +341,13 @@ header.app-header {
   min-width: 0;
 }
 
+.card-header-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .person-name {
   font-family: var(--font-display);
   font-size: 1.4rem;
@@ -348,6 +355,27 @@ header.app-header {
   text-transform: uppercase;
   margin: 0 0 2px;
   overflow-wrap: break-word;
+}
+
+.lifetime-badge {
+  flex: 0 0 auto;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.7rem;
+  color: var(--pink);
+  border: 2px solid var(--pink);
+  border-radius: 999px;
+  padding: 4px 10px;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+.person-total-label {
+  color: #888;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0;
 }
 
 .crown {

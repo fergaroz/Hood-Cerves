@@ -79,16 +79,16 @@ export default function Home() {
   );
   const totalCombinedLiters = totalBeerLiters + totalCubataLiters;
 
-  const maxLiters = people.reduce((max, p) => Math.max(max, p.totalLiters), 0);
+  const maxLiters = people.reduce((max, p) => Math.max(max, p.monthLiters), 0);
   const maxCubataLiters = people.reduce(
-    (max, p) => Math.max(max, p.totalCubataLiters),
+    (max, p) => Math.max(max, p.monthCubataLiters),
     0
   );
 
   const normalize = (n: number) => Math.round(n * 100);
   const maxNormalized = normalize(maxLiters);
   const leadersCount = people.filter(
-    (p) => normalize(p.totalLiters) === maxNormalized
+    (p) => normalize(p.monthLiters) === maxNormalized
   ).length;
   const hasSingleLeader = maxNormalized > 0 && leadersCount === 1;
 
@@ -151,7 +151,7 @@ export default function Home() {
                 person={person}
                 maxLiters={maxLiters}
                 isLeader={
-                  hasSingleLeader && normalize(person.totalLiters) === maxNormalized
+                  hasSingleLeader && normalize(person.monthLiters) === maxNormalized
                 }
                 onDrink={handleDrink}
                 onUndo={handleUndo}

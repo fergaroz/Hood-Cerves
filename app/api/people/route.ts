@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getMadridDateParts } from "@/lib/madridTime";
 import type { PersonWithTotal } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -13,12 +14,24 @@ export async function GET() {
     orderBy: { createdAt: "asc" },
   });
 
+  const now = getMadridDateParts(new Date());
+  const isSameMonth = (createdAt: Date) => {
+    const p = getMadridDateParts(new Date(createdAt));
+    return p.year === now.year && p.month === now.month;
+  };
+
   const result: PersonWithTotal[] = people.map((p) => ({
     id: p.id,
     name: p.name,
     totalLiters: p.drinks.reduce((sum, d) => sum + d.liters, 0),
+    monthLiters: p.drinks
+      .filter((d) => isSameMonth(d.createdAt))
+      .reduce((sum, d) => sum + d.liters, 0),
     lastDrinkId: p.drinks[0]?.id ?? null,
     totalCubataLiters: p.cubatas.reduce((sum, c) => sum + c.liters, 0),
+    monthCubataLiters: p.cubatas
+      .filter((c) => isSameMonth(c.createdAt))
+      .reduce((sum, c) => sum + c.liters, 0),
     lastCubataId: p.cubatas[0]?.id ?? null,
   }));
 

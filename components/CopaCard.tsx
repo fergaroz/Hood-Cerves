@@ -22,8 +22,8 @@ export function CopaCard({
   const [customLiters, setCustomLiters] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const ratio = maxLiters > 0 ? person.totalCubataLiters / maxLiters : 0;
-  const badge = getCurrentBadge(person.totalCubataLiters);
+  const ratio = maxLiters > 0 ? person.monthCubataLiters / maxLiters : 0;
+  const badge = getCurrentBadge(person.monthCubataLiters);
 
   async function addCubata(liters: number, label?: string) {
     if (busy) return;
@@ -68,9 +68,15 @@ export function CopaCard({
         <CiderGlass ratio={ratio} />
       </div>
       <div className="info-col">
-        <p className="person-name">{person.name}</p>
+        <div className="card-header-row">
+          <p className="person-name">{person.name}</p>
+          <span className="lifetime-badge" title="Total histórico">
+            Total {person.totalCubataLiters.toFixed(2)}L
+          </span>
+        </div>
         {badge && <p className="rank-badge">{badge.name}</p>}
-        <p className="person-total">{person.totalCubataLiters.toFixed(2)} L</p>
+        <p className="person-total-label">Este mes</p>
+        <p className="person-total">{person.monthCubataLiters.toFixed(2)} L</p>
 
         <div className="quick-buttons">
           {CUBATA_QUICK_SIZES.map((size) => (

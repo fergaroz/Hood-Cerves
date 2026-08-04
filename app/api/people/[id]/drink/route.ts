@@ -4,6 +4,7 @@ import { broadcastPush } from "@/lib/push";
 import { resolveLabel } from "@/lib/quickSizes";
 import { badgeEmojiSuffix, getBadgesCrossed } from "@/lib/badges";
 import { getDailyMilestonesCrossed } from "@/lib/dailyMilestones";
+import { getMadridDateParts } from "@/lib/madridTime";
 
 export const dynamic = "force-dynamic";
 
@@ -25,28 +26,39 @@ export async function POST(
   const label = resolveLabel(liters, rawLabel);
   const personId = params.id;
 
-  const now = new Date();
-  const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const dayEnd = new Date(dayStart);
-  dayEnd.setDate(dayEnd.getDate() + 1);
-
-  const [totalAgg, dayAgg, person] = await Promise.all([
-    prisma.drink.aggregate({ where: { personId }, _sum: { liters: true } }),
-    prisma.drink.aggregate({
-      where: { personId, createdAt: { gte: dayStart, lt: dayEnd } },
-      _sum: { liters: true },
+  const [existingDrinks, person] = await Promise.all([
+    prisma.drink.findMany({
+      where: { personId },
+      select: { liters: true, createdAt: true },
     }),
     prisma.person.findUnique({ where: { id: personId } }),
   ]);
 
-  const prevTotal = totalAgg._sum.liters ?? 0;
-  const prevDayTotal = dayAgg._sum.liters ?? 0;
+  const nowParts = getMadridDateParts(new Date());
+
+  const prevMonthTotal = existingDrinks
+    .filter((d) => {
+      const p = getMadridDateParts(d.createdAt);
+      return p.year === nowParts.year && p.month === nowParts.month;
+    })
+    .reduce((sum, d) => sum + d.liters, 0);
+
+  const prevDayTotal = existingDrinks
+    .filter((d) => {
+      const p = getMadridDateParts(d.createdAt);
+      return (
+        p.year === nowParts.year &&
+        p.month === nowParts.month &&
+        p.day === nowParts.day
+      );
+    })
+    .reduce((sum, d) => sum + d.liters, 0);
 
   const drink = await prisma.drink.create({
     data: { liters, label, personId },
   });
 
-  const newTotal = prevTotal + liters;
+  const newMonthTotal = prevMonthTotal + liters;
   const newDayTotal = prevDayTotal + liters;
 
   if (person) {
@@ -55,7 +67,7 @@ export async function POST(
       body: `¡${person.name} se acaba de tomar: ${label}!`,
     }).catch(() => null);
 
-    const crossedBadges = getBadgesCrossed(prevTotal, newTotal);
+    const crossedBadges = getBadgesCrossed(prevMonthTotal, newMonthTotal);
     for (const badge of crossedBadges) {
       await broadcastPush({
         title: "Hood Cerves",
