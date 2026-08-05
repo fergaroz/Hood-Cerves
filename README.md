@@ -114,6 +114,35 @@ https://TU-URL-DE-VERCEL.vercel.app/api/cron/monthly-report?secret=cYeGwRL_Dp-ru
 Si todo va bien, verás un JSON con `"sent": true` y a quien tenga las
 notificaciones activadas le llegará el aviso al momento.
 
+## 8. Copia de seguridad diaria y recuperar a alguien borrado por error
+
+Cada día a las 4:00 (hora UTC) se guarda automáticamente una copia completa
+de todos los datos (personas, cervezas, cubatas, con sus fechas exactas)
+dentro de la propia base de datos. Se conservan los últimos 30 días.
+
+**Si borras a alguien por error** (el botón "Eliminar" es irreversible y
+borra también todo su historial), puedes recuperarlo así:
+
+1. Abre esta URL en el navegador, cambiando `NOMBRE` por el nombre exacto de
+   la persona:
+
+   ```
+   https://TU-URL-DE-VERCEL.vercel.app/api/admin/restore-person?name=NOMBRE&secret=cYeGwRL_Dp-ruum3CMtpUfVOMu8AYuRHDUqAMGXav0E
+   ```
+
+2. Si todo va bien, verás un JSON con `"ok": true` y el número de cervezas y
+   cubatas restauradas. La persona reaparecerá en la web (haz refresco
+   forzado, `Ctrl+F5`, si no la ves al momento).
+
+**Limitación importante**: la copia se hace una vez al día, así que si
+borras a alguien el mismo día que ha bebido algo, esa última copia (de esta
+madrugada) no incluirá lo de hoy — se recupera todo excepto lo apuntado
+ese mismo día. No hay forma de recuperar nada de un día que aún no ha
+tenido su copia de seguridad.
+
+Esta ruta usa la misma variable `CRON_SECRET` que ya tienes configurada
+(ver punto 7).
+
 ## Desarrollo local
 
 Este proyecto no se ha podido instalar/probar localmente porque la máquina

@@ -50,3 +50,9 @@ model AnimateEvent {
   message   String?
   createdAt DateTime @default(now())
 }
+
+model Backup {
+  id        String   @id @default(cuid())
+  data      String
+  createdAt DateTime @default(now())
+}
