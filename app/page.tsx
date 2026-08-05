@@ -98,6 +98,16 @@ export default function Home() {
   ).length;
   const hasSingleCubataLeader = maxCubataNormalized > 0 && cubataLeadersCount === 1;
 
+  const minNormalized =
+    people.length > 0 ? normalize(Math.min(...people.map((p) => p.monthLiters))) : 0;
+  const hasMinSpread = people.length > 0 && minNormalized < maxNormalized;
+
+  const minCubataNormalized =
+    people.length > 0
+      ? normalize(Math.min(...people.map((p) => p.monthCubataLiters)))
+      : 0;
+  const hasMinCubataSpread = people.length > 0 && minCubataNormalized < maxCubataNormalized;
+
   function rankOf(value: number, allValues: number[]): number {
     const normalized = normalize(value);
     const higherCount = allValues.filter((v) => normalize(v) > normalized).length;
@@ -165,6 +175,7 @@ export default function Home() {
                 isLeader={
                   hasSingleLeader && normalize(person.monthLiters) === maxNormalized
                 }
+                isLast={hasMinSpread && normalize(person.monthLiters) === minNormalized}
                 rank={rankOf(
                   person.monthLiters,
                   people.map((p) => p.monthLiters)
@@ -198,6 +209,10 @@ export default function Home() {
                 isLeader={
                   hasSingleCubataLeader &&
                   normalize(person.monthCubataLiters) === maxCubataNormalized
+                }
+                isLast={
+                  hasMinCubataSpread &&
+                  normalize(person.monthCubataLiters) === minCubataNormalized
                 }
                 rank={rankOf(
                   person.monthCubataLiters,

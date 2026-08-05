@@ -10,6 +10,7 @@ export function PersonCard({
   person,
   maxLiters,
   isLeader,
+  isLast,
   rank,
   onDrink,
   onUndo,
@@ -18,6 +19,7 @@ export function PersonCard({
   person: PersonWithTotal;
   maxLiters: number;
   isLeader: boolean;
+  isLast: boolean;
   rank: number;
   onDrink: (personId: string, liters: number, label?: string) => Promise<void>;
   onUndo: (personId: string) => Promise<void>;
@@ -80,6 +82,7 @@ export function PersonCard({
           <p className="person-name">
             {person.name}
             {isLeader && <span className="crown">🐐</span>}
+            {isLast && <span className="crown">🏳️‍🌈</span>}
           </p>
           <span className="lifetime-badge" title="Total histórico">
             Total {person.totalLiters.toFixed(2)}L
