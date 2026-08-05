@@ -143,6 +143,35 @@ tenido su copia de seguridad.
 Esta ruta usa la misma variable `CRON_SECRET` que ya tienes configurada
 (ver punto 7).
 
+## 9. Contraseña de acceso compartida
+
+Toda la web (excepto la propia pantalla de login y las rutas de cron/admin,
+que ya tienen su propio secreto) queda protegida por una contraseña
+compartida. La primera vez que alguien entra, le pide la contraseña; si la
+acierta, se le guarda una cookie válida durante un año en ese navegador, así
+que no se la vuelve a pedir salvo que borre las cookies, use otro
+dispositivo, o cambies la contraseña.
+
+Añade estas dos variables de entorno en Vercel (**Settings → Environment
+Variables**, Production y Preview):
+
+```
+SITE_PASSWORD=la-contraseña-que-elijas-para-el-grupo
+SITE_AUTH_TOKEN=Vyyb1Uko2jlTDaPlnTfJUmbyoU7tilBH7KQJkzC_pIQ
+```
+
+`SITE_PASSWORD` es la que escribirá la gente (elige la que quieras, no hace
+falta que sea complicada ya que solo la vais a usar vosotros).
+`SITE_AUTH_TOKEN` es un valor interno que no escribe nadie, solo se usa para
+la cookie de sesión — puedes dejar el de arriba o generar otro tuyo, da
+igual, mientras no lo compartas.
+
+Si en algún momento quieres que todo el grupo tenga que volver a meter la
+contraseña (por ejemplo, si se ha filtrado a alguien que no debería tenerla),
+cambia el valor de `SITE_PASSWORD` (y opcionalmente también
+`SITE_AUTH_TOKEN`) y haz Redeploy — invalida todas las cookies existentes de
+golpe.
+
 ## Desarrollo local
 
 Este proyecto no se ha podido instalar/probar localmente porque la máquina
