@@ -9,12 +9,16 @@ import type { PersonWithTotal } from "@/lib/types";
 export function CopaCard({
   person,
   maxLiters,
+  isLeader,
+  rank,
   onDrink,
   onUndo,
   onDelete,
 }: {
   person: PersonWithTotal;
   maxLiters: number;
+  isLeader: boolean;
+  rank: number;
   onDrink: (personId: string, liters: number, label?: string) => Promise<void>;
   onUndo: (personId: string) => Promise<void>;
   onDelete: (personId: string) => Promise<void>;
@@ -65,11 +69,18 @@ export function CopaCard({
   return (
     <div className="person-card">
       <div className="jar-col">
+        <button className="delete-x" onClick={handleDelete} aria-label="Eliminar">
+          ✕
+        </button>
         <CiderGlass ratio={ratio} />
+        <span className="rank-number">#{rank}</span>
       </div>
       <div className="info-col">
         <div className="card-header-row">
-          <p className="person-name">{person.name}</p>
+          <p className="person-name">
+            {person.name}
+            {isLeader && <span className="crown">🐐</span>}
+          </p>
           <span className="lifetime-badge" title="Total histórico">
             Total {person.totalCubataLiters.toFixed(2)}L
           </span>
@@ -126,9 +137,6 @@ export function CopaCard({
               <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
             </svg>
             Deshacer última
-          </button>
-          <button className="link-btn delete" onClick={handleDelete}>
-            Eliminar ✕
           </button>
         </div>
       </div>

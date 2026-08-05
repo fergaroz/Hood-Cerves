@@ -92,6 +92,18 @@ export default function Home() {
   ).length;
   const hasSingleLeader = maxNormalized > 0 && leadersCount === 1;
 
+  const maxCubataNormalized = normalize(maxCubataLiters);
+  const cubataLeadersCount = people.filter(
+    (p) => normalize(p.monthCubataLiters) === maxCubataNormalized
+  ).length;
+  const hasSingleCubataLeader = maxCubataNormalized > 0 && cubataLeadersCount === 1;
+
+  function rankOf(value: number, allValues: number[]): number {
+    const normalized = normalize(value);
+    const higherCount = allValues.filter((v) => normalize(v) > normalized).length;
+    return higherCount + 1;
+  }
+
   return (
     <main>
       <header className="app-header">
@@ -153,6 +165,10 @@ export default function Home() {
                 isLeader={
                   hasSingleLeader && normalize(person.monthLiters) === maxNormalized
                 }
+                rank={rankOf(
+                  person.monthLiters,
+                  people.map((p) => p.monthLiters)
+                )}
                 onDrink={handleDrink}
                 onUndo={handleUndo}
                 onDelete={handleDelete}
@@ -179,6 +195,14 @@ export default function Home() {
                 key={person.id}
                 person={person}
                 maxLiters={maxCubataLiters}
+                isLeader={
+                  hasSingleCubataLeader &&
+                  normalize(person.monthCubataLiters) === maxCubataNormalized
+                }
+                rank={rankOf(
+                  person.monthCubataLiters,
+                  people.map((p) => p.monthCubataLiters)
+                )}
                 onDrink={handleCubataAdd}
                 onUndo={handleCubataUndo}
                 onDelete={handleDelete}
