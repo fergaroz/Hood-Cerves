@@ -520,8 +520,6 @@ header.app-header {
 }
 
 .imparable-badge {
-  color: var(--pink);
-  border-color: var(--pink);
   margin-top: -4px;
 }
 

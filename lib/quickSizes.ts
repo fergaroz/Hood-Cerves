@@ -9,6 +9,7 @@ export const QUICK_SIZES = [
 export const CUBATA_QUICK_SIZES = [
   { label: "Cubata", liters: 0.5 },
   { label: "Chupitos", liters: 0.3 },
+  { label: "Tubo", liters: 0.3 },
 ];
 
 export const SIDRA_QUICK_SIZES = [{ label: "Sidra", liters: 0.1 }];
