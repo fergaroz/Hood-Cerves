@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CiderGlass } from "./CiderGlass";
-import { getCurrentBadge } from "@/lib/badges";
+import { getCurrentBadge, getImparableLevel, toRomanNumeral } from "@/lib/badges";
 import { CUBATA_QUICK_SIZES } from "@/lib/quickSizes";
 import type { PersonWithTotal } from "@/lib/types";
 
@@ -30,6 +30,7 @@ export function CopaCard({
 
   const ratio = maxLiters > 0 ? person.monthCubataLiters / maxLiters : 0;
   const badge = getCurrentBadge(person.monthCubataLiters);
+  const imparableLevel = getImparableLevel(person.monthCubataLiters);
 
   async function addCubata(liters: number, label?: string) {
     if (busy) return;
@@ -89,6 +90,11 @@ export function CopaCard({
           </span>
         </div>
         {badge && <p className="rank-badge">{badge.name}</p>}
+        {imparableLevel > 0 && (
+          <p className="rank-badge imparable-badge">
+            Imparable {toRomanNumeral(imparableLevel)}
+          </p>
+        )}
         <p className="person-total">
           {person.monthCubataLiters.toFixed(2)} L
           <span className="person-total-label">Este mes</span>

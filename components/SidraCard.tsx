@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { SidraGlass } from "./SidraGlass";
-import { getCurrentBadge } from "@/lib/badges";
+import { getCurrentBadge, getImparableLevel, toRomanNumeral } from "@/lib/badges";
 import { SIDRA_QUICK_SIZES } from "@/lib/quickSizes";
 import type { PersonWithTotal } from "@/lib/types";
 
@@ -29,6 +29,7 @@ export function SidraCard({
 
   const ratio = maxLiters > 0 ? person.monthSidraLiters / maxLiters : 0;
   const badge = getCurrentBadge(person.monthSidraLiters);
+  const imparableLevel = getImparableLevel(person.monthSidraLiters);
 
   async function addSidra(liters: number, label?: string) {
     if (busy) return;
@@ -81,6 +82,11 @@ export function SidraCard({
           </span>
         </div>
         {badge && <p className="rank-badge">{badge.name}</p>}
+        {imparableLevel > 0 && (
+          <p className="rank-badge imparable-badge">
+            Imparable {toRomanNumeral(imparableLevel)}
+          </p>
+        )}
         <p className="person-total">
           {person.monthSidraLiters.toFixed(2)} L
           <span className="person-total-label">Este mes</span>

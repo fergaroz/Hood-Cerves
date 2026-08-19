@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { BeerJar } from "./BeerJar";
 import { QUICK_SIZES } from "@/lib/quickSizes";
-import { getCurrentBadge } from "@/lib/badges";
+import { getCurrentBadge, getImparableLevel, toRomanNumeral } from "@/lib/badges";
 import type { PersonWithTotal } from "@/lib/types";
 
 export function PersonCard({
@@ -30,6 +30,7 @@ export function PersonCard({
 
   const ratio = maxLiters > 0 ? person.monthLiters / maxLiters : 0;
   const badge = getCurrentBadge(person.monthLiters);
+  const imparableLevel = getImparableLevel(person.monthLiters);
 
   async function addDrink(liters: number, label?: string) {
     if (busy) return;
@@ -89,6 +90,11 @@ export function PersonCard({
           </span>
         </div>
         {badge && <p className="rank-badge">{badge.name}</p>}
+        {imparableLevel > 0 && (
+          <p className="rank-badge imparable-badge">
+            Imparable {toRomanNumeral(imparableLevel)}
+          </p>
+        )}
         <p className="person-total">
           {person.monthLiters.toFixed(2)} L
           <span className="person-total-label">Este mes</span>

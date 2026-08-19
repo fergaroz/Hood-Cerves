@@ -519,6 +519,12 @@ header.app-header {
   border: 1px solid #3a3c3e;
 }
 
+.imparable-badge {
+  color: var(--pink);
+  border-color: var(--pink);
+  margin-top: -4px;
+}
+
 .person-total {
   color: var(--yellow);
   font-weight: 700;
