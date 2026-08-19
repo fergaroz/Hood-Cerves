@@ -13,6 +13,7 @@ model Person {
   createdAt DateTime @default(now())
   drinks    Drink[]
   cubatas   Cubata[]
+  sidras    Sidra[]
 }
 
 model Drink {
@@ -27,6 +28,17 @@ model Drink {
 }
 
 model Cubata {
+  id        String   @id @default(cuid())
+  liters    Float
+  label     String?
+  createdAt DateTime @default(now())
+  person    Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  personId  String
+
+  @@index([personId])
+}
+
+model Sidra {
   id        String   @id @default(cuid())
   liters    Float
   label     String?

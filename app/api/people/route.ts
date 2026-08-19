@@ -10,6 +10,7 @@ export async function GET() {
     include: {
       drinks: { orderBy: { createdAt: "desc" } },
       cubatas: { orderBy: { createdAt: "desc" } },
+      sidras: { orderBy: { createdAt: "desc" } },
     },
     orderBy: { createdAt: "asc" },
   });
@@ -33,6 +34,11 @@ export async function GET() {
       .filter((c) => isSameMonth(c.createdAt))
       .reduce((sum, c) => sum + c.liters, 0),
     lastCubataId: p.cubatas[0]?.id ?? null,
+    totalSidraLiters: p.sidras.reduce((sum, s) => sum + s.liters, 0),
+    monthSidraLiters: p.sidras
+      .filter((s) => isSameMonth(s.createdAt))
+      .reduce((sum, s) => sum + s.liters, 0),
+    lastSidraId: p.sidras[0]?.id ?? null,
   }));
 
   return NextResponse.json(result);

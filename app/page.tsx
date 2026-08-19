@@ -6,6 +6,7 @@ import { AnimateButton } from "@/components/AnimateButton";
 import { CopaCard } from "@/components/CopaCard";
 import { NotificationButton } from "@/components/NotificationButton";
 import { PersonCard } from "@/components/PersonCard";
+import { SidraCard } from "@/components/SidraCard";
 import { TotalCounter } from "@/components/TotalCounter";
 import type { PersonWithTotal } from "@/lib/types";
 
@@ -14,7 +15,7 @@ const POLL_INTERVAL_MS = 5000;
 export default function Home() {
   const [people, setPeople] = useState<PersonWithTotal[]>([]);
   const [loaded, setLoaded] = useState(false);
-  const [tab, setTab] = useState<"cerveza" | "copas">("cerveza");
+  const [tab, setTab] = useState<"cerveza" | "copas" | "sidra">("cerveza");
 
   const refresh = useCallback(async () => {
     const res = await fetch("/api/people", { cache: "no-store" });
@@ -67,6 +68,20 @@ export default function Home() {
     await refresh();
   }
 
+  async function handleSidraAdd(personId: string, liters: number, label?: string) {
+    await fetch(`/api/people/${personId}/sidra`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ liters, label }),
+    });
+    await refresh();
+  }
+
+  async function handleSidraUndo(personId: string) {
+    await fetch(`/api/people/${personId}/sidra/undo`, { method: "POST" });
+    await refresh();
+  }
+
   async function handleDelete(personId: string) {
     await fetch(`/api/people/${personId}`, { method: "DELETE" });
     await refresh();
@@ -77,15 +92,21 @@ export default function Home() {
     (sum, p) => sum + p.totalCubataLiters,
     0
   );
-  const totalCombinedLiters = totalBeerLiters + totalCubataLiters;
+  const totalSidraLiters = people.reduce((sum, p) => sum + p.totalSidraLiters, 0);
+  const totalCombinedLiters = totalBeerLiters + totalCubataLiters + totalSidraLiters;
 
   const maxLiters = people.reduce((max, p) => Math.max(max, p.monthLiters), 0);
   const maxCubataLiters = people.reduce(
     (max, p) => Math.max(max, p.monthCubataLiters),
     0
   );
+  const maxSidraLiters = people.reduce(
+    (max, p) => Math.max(max, p.monthSidraLiters),
+    0
+  );
 
   const normalize = (n: number) => Math.round(n * 100);
+
   const maxNormalized = normalize(maxLiters);
   const leadersCount = people.filter(
     (p) => normalize(p.monthLiters) === maxNormalized
@@ -98,6 +119,12 @@ export default function Home() {
   ).length;
   const hasSingleCubataLeader = maxCubataNormalized > 0 && cubataLeadersCount === 1;
 
+  const maxSidraNormalized = normalize(maxSidraLiters);
+  const sidraLeadersCount = people.filter(
+    (p) => normalize(p.monthSidraLiters) === maxSidraNormalized
+  ).length;
+  const hasSingleSidraLeader = maxSidraNormalized > 0 && sidraLeadersCount === 1;
+
   const minNormalized =
     people.length > 0 ? normalize(Math.min(...people.map((p) => p.monthLiters))) : 0;
   const hasMinSpread = people.length > 0 && minNormalized < maxNormalized;
@@ -107,6 +134,12 @@ export default function Home() {
       ? normalize(Math.min(...people.map((p) => p.monthCubataLiters)))
       : 0;
   const hasMinCubataSpread = people.length > 0 && minCubataNormalized < maxCubataNormalized;
+
+  const minSidraNormalized =
+    people.length > 0
+      ? normalize(Math.min(...people.map((p) => p.monthSidraLiters)))
+      : 0;
+  const hasMinSidraSpread = people.length > 0 && minSidraNormalized < maxSidraNormalized;
 
   function rankOf(value: number, allValues: number[]): number {
     const normalized = normalize(value);
@@ -141,6 +174,12 @@ export default function Home() {
           onClick={() => setTab("copas")}
         >
           Copas
+        </button>
+        <button
+          className={`tab-btn ${tab === "sidra" ? "active" : ""}`}
+          onClick={() => setTab("sidra")}
+        >
+          Sidras
         </button>
       </div>
 
@@ -220,6 +259,44 @@ export default function Home() {
                 )}
                 onDrink={handleCubataAdd}
                 onUndo={handleCubataUndo}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {tab === "sidra" && (
+        <>
+          <TotalCounter totalLiters={totalSidraLiters} label="Total sidras" />
+          <TotalCounter totalLiters={totalCombinedLiters} label="Total del grupo" />
+
+          <AddPersonForm onAdd={handleAdd} />
+
+          {loaded && people.length === 0 && (
+            <p className="empty-state">Nadie apuntado todavía. ¡Añade a alguien!</p>
+          )}
+
+          <div className="people-grid">
+            {people.map((person) => (
+              <SidraCard
+                key={person.id}
+                person={person}
+                maxLiters={maxSidraLiters}
+                isLeader={
+                  hasSingleSidraLeader &&
+                  normalize(person.monthSidraLiters) === maxSidraNormalized
+                }
+                isLast={
+                  hasMinSidraSpread &&
+                  normalize(person.monthSidraLiters) === minSidraNormalized
+                }
+                rank={rankOf(
+                  person.monthSidraLiters,
+                  people.map((p) => p.monthSidraLiters)
+                )}
+                onDrink={handleSidraAdd}
+                onUndo={handleSidraUndo}
                 onDelete={handleDelete}
               />
             ))}

@@ -95,12 +95,16 @@ function monthlyRows(entries: MonthlyEntry[]): (string | number)[][] {
 }
 
 export async function GET() {
-  const [drinks, cubatas] = await Promise.all([
+  const [drinks, cubatas, sidras] = await Promise.all([
     prisma.drink.findMany({
       include: { person: true },
       orderBy: { createdAt: "asc" },
     }),
     prisma.cubata.findMany({
+      include: { person: true },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.sidra.findMany({
       include: { person: true },
       orderBy: { createdAt: "asc" },
     }),
@@ -117,6 +121,7 @@ export async function GET() {
   ];
   addTableSheet(workbook, "Registro cervezas", registroColumns, registroRows(drinks));
   addTableSheet(workbook, "Registro cubatas", registroColumns, registroRows(cubatas));
+  addTableSheet(workbook, "Registro sidras", registroColumns, registroRows(sidras));
 
   const resumenColumns = [
     { name: "Mes", width: 18 },
@@ -134,6 +139,12 @@ export async function GET() {
     "Resumen mensual cubatas",
     resumenColumns,
     monthlyRows(computeMonthlyRows(cubatas))
+  );
+  addTableSheet(
+    workbook,
+    "Resumen mensual sidras",
+    resumenColumns,
+    monthlyRows(computeMonthlyRows(sidras))
   );
 
   const buffer = await workbook.xlsx.writeBuffer();

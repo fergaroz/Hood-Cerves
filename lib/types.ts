@@ -7,4 +7,7 @@ export type PersonWithTotal = {
   totalCubataLiters: number;
   monthCubataLiters: number;
   lastCubataId: string | null;
+  totalSidraLiters: number;
+  monthSidraLiters: number;
+  lastSidraId: string | null;
 };

@@ -25,6 +25,7 @@ export async function GET(req: NextRequest) {
     include: {
       drinks: { orderBy: { createdAt: "asc" } },
       cubatas: { orderBy: { createdAt: "asc" } },
+      sidras: { orderBy: { createdAt: "asc" } },
     },
     orderBy: { createdAt: "asc" },
   });
@@ -43,6 +44,11 @@ export async function GET(req: NextRequest) {
         liters: c.liters,
         label: c.label,
         createdAt: c.createdAt,
+      })),
+      sidras: p.sidras.map((s) => ({
+        liters: s.liters,
+        label: s.label,
+        createdAt: s.createdAt,
       })),
     })),
   };
