@@ -6,16 +6,39 @@ import { AnimateButton } from "@/components/AnimateButton";
 import { CopaCard } from "@/components/CopaCard";
 import { NotificationButton } from "@/components/NotificationButton";
 import { PersonCard } from "@/components/PersonCard";
+import { Podium, type PodiumEntry } from "@/components/Podium";
 import { SidraCard } from "@/components/SidraCard";
 import { TotalCounter } from "@/components/TotalCounter";
+import { madridWallClockToUtc } from "@/lib/madridTime";
 import type { PersonWithTotal } from "@/lib/types";
 
 const POLL_INTERVAL_MS = 5000;
+
+const SIDRA_UNLOCK_START = madridWallClockToUtc(2026, 8, 28, 0, 0, 0);
+const SIDRA_UNLOCK_END = madridWallClockToUtc(2026, 8, 30, 23, 59, 59);
+
+function computePodium(entries: { name: string; liters: number }[]): PodiumEntry[] {
+  const positive = entries.filter((e) => e.liters > 0);
+  const distinct = Array.from(
+    new Set(positive.map((e) => Math.round(e.liters * 100)))
+  )
+    .sort((a, b) => b - a)
+    .slice(0, 3);
+
+  return distinct.map((normalized, idx) => ({
+    rank: (idx + 1) as 1 | 2 | 3,
+    names: positive
+      .filter((e) => Math.round(e.liters * 100) === normalized)
+      .map((e) => e.name),
+    liters: normalized / 100,
+  }));
+}
 
 export default function Home() {
   const [people, setPeople] = useState<PersonWithTotal[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [tab, setTab] = useState<"cerveza" | "copas" | "sidra">("cerveza");
+  const [sidraUnlocked, setSidraUnlocked] = useState(false);
 
   const refresh = useCallback(async () => {
     const res = await fetch("/api/people", { cache: "no-store" });
@@ -30,6 +53,18 @@ export default function Home() {
     const interval = setInterval(refresh, POLL_INTERVAL_MS);
     return () => clearInterval(interval);
   }, [refresh]);
+
+  useEffect(() => {
+    const check = () => {
+      const now = Date.now();
+      setSidraUnlocked(
+        now >= SIDRA_UNLOCK_START.getTime() && now <= SIDRA_UNLOCK_END.getTime()
+      );
+    };
+    check();
+    const interval = setInterval(check, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   async function handleAdd(name: string) {
     await fetch("/api/people", {
@@ -147,6 +182,14 @@ export default function Home() {
     return higherCount + 1;
   }
 
+  const beerPodium = computePodium(people.map((p) => ({ name: p.name, liters: p.monthLiters })));
+  const cubataPodium = computePodium(
+    people.map((p) => ({ name: p.name, liters: p.monthCubataLiters }))
+  );
+  const sidraPodium = computePodium(
+    people.map((p) => ({ name: p.name, liters: p.monthSidraLiters }))
+  );
+
   return (
     <main>
       <header className="app-header">
@@ -179,7 +222,7 @@ export default function Home() {
           className={`tab-btn ${tab === "sidra" ? "active" : ""}`}
           onClick={() => setTab("sidra")}
         >
-          Sidras
+          Sidras {!sidraUnlocked && "🔒"}
         </button>
       </div>
 
@@ -191,6 +234,8 @@ export default function Home() {
           <div className="animate-row">
             <AnimateButton />
           </div>
+
+          <Podium entries={beerPodium} />
 
           <div className="export-row">
             <NotificationButton />
@@ -233,6 +278,8 @@ export default function Home() {
           <TotalCounter totalLiters={totalCubataLiters} label="Total cubatas" />
           <TotalCounter totalLiters={totalCombinedLiters} label="Total del grupo" />
 
+          <Podium entries={cubataPodium} />
+
           <AddPersonForm onAdd={handleAdd} />
 
           {loaded && people.length === 0 && (
@@ -266,10 +313,20 @@ export default function Home() {
         </>
       )}
 
-      {tab === "sidra" && (
+      {tab === "sidra" && !sidraUnlocked && (
+        <div className="locked-panel">
+          <span className="locked-emoji">🔒🍏</span>
+          <p className="locked-title">Sección bloqueada</p>
+          <p>Disponible del 28 al 30 de agosto. ¡Vuelve por aquí esos días!</p>
+        </div>
+      )}
+
+      {tab === "sidra" && sidraUnlocked && (
         <>
           <TotalCounter totalLiters={totalSidraLiters} label="Total sidras" />
           <TotalCounter totalLiters={totalCombinedLiters} label="Total del grupo" />
+
+          <Podium entries={sidraPodium} />
 
           <AddPersonForm onAdd={handleAdd} />
 
