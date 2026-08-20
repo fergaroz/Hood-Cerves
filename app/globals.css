@@ -487,6 +487,50 @@ header.app-header {
   justify-content: center;
 }
 
+.chart-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
+.chart-legend {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 4px;
+}
+
+.chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  color: #ccc;
+}
+
+.chart-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 3px;
+  border-radius: 2px;
+}
+
+.chart-swatch-current {
+  background: #f2b705;
+}
+
+.chart-swatch-previous {
+  background: #ef5b25;
+  background-image: repeating-linear-gradient(
+    90deg,
+    #ef5b25 0,
+    #ef5b25 3px,
+    transparent 3px,
+    transparent 5px
+  );
+}
+
 .chart-empty {
   color: #888;
   font-family: var(--font-body);
