@@ -112,16 +112,26 @@ export function HistoryChart({ data }: { data: HistorySeries | null }) {
         {peakCurrent && peakCurrent.liters > 0 && (
           <>
             <circle cx={xFor(peakCurrent.day)} cy={yFor(peakCurrent.liters)} r="3.5" fill="#f2b705" />
-            <text
-              x={Math.min(xFor(peakCurrent.day), width - marginRight - 4)}
-              y={Math.max(yFor(peakCurrent.liters) - 8, marginTop + 8)}
-              fontSize="11"
-              fontWeight="700"
-              fill="#f2b705"
-              textAnchor="end"
-            >
-              {peakCurrent.liters.toFixed(2)}L (día {peakCurrent.day})
-            </text>
+            {(() => {
+              const peakX = xFor(peakCurrent.day);
+              const nearLeftEdge = peakX < marginLeft + 55;
+              const anchor = nearLeftEdge ? "start" : "end";
+              const labelX = nearLeftEdge
+                ? Math.max(peakX, marginLeft)
+                : Math.min(peakX, width - marginRight - 4);
+              return (
+                <text
+                  x={labelX}
+                  y={Math.max(yFor(peakCurrent.liters) - 8, marginTop + 8)}
+                  fontSize="11"
+                  fontWeight="700"
+                  fill="#f2b705"
+                  textAnchor={anchor}
+                >
+                  {peakCurrent.liters.toFixed(2)}L (día {peakCurrent.day})
+                </text>
+              );
+            })()}
           </>
         )}
       </svg>
