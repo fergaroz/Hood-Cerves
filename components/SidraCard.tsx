@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { SidraGlass } from "./SidraGlass";
 import { FlipCard } from "./FlipCard";
-import { HistoryChart, type HistoryPoint } from "./HistoryChart";
+import { HistoryChart, type HistorySeries } from "./HistoryChart";
 import { getCurrentBadge, getImparableLevel, toRomanNumeral } from "@/lib/badges";
 import { SIDRA_QUICK_SIZES } from "@/lib/quickSizes";
 import type { PersonWithTotal } from "@/lib/types";
@@ -28,7 +28,7 @@ export function SidraCard({
   onDelete: (personId: string) => Promise<void>;
 }) {
   const [busy, setBusy] = useState(false);
-  const [history, setHistory] = useState<HistoryPoint[] | null>(null);
+  const [history, setHistory] = useState<HistorySeries | null>(null);
 
   const ratio = maxLiters > 0 ? person.monthSidraLiters / maxLiters : 0;
   const badge = getCurrentBadge(person.monthSidraLiters);
@@ -69,7 +69,7 @@ export function SidraCard({
     const res = await fetch(`/api/people/${person.id}/history?type=sidra`);
     if (res.ok) {
       const json = await res.json();
-      setHistory(json.data);
+      setHistory({ current: json.current, previous: json.previous });
     }
   }
 

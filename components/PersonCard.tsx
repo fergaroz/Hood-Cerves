@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { BeerJar } from "./BeerJar";
 import { FlipCard } from "./FlipCard";
-import { HistoryChart, type HistoryPoint } from "./HistoryChart";
+import { HistoryChart, type HistorySeries } from "./HistoryChart";
 import { QUICK_SIZES } from "@/lib/quickSizes";
 import { getCurrentBadge, getImparableLevel, toRomanNumeral } from "@/lib/badges";
 import type { PersonWithTotal } from "@/lib/types";
@@ -29,7 +29,7 @@ export function PersonCard({
 }) {
   const [customLiters, setCustomLiters] = useState("");
   const [busy, setBusy] = useState(false);
-  const [history, setHistory] = useState<HistoryPoint[] | null>(null);
+  const [history, setHistory] = useState<HistorySeries | null>(null);
 
   const ratio = maxLiters > 0 ? person.monthLiters / maxLiters : 0;
   const badge = getCurrentBadge(person.monthLiters);
@@ -77,7 +77,7 @@ export function PersonCard({
     const res = await fetch(`/api/people/${person.id}/history?type=drink`);
     if (res.ok) {
       const json = await res.json();
-      setHistory(json.data);
+      setHistory({ current: json.current, previous: json.previous });
     }
   }
 

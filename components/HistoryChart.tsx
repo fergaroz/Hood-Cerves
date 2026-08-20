@@ -1,16 +1,20 @@
 "use client";
 
 export type HistoryPoint = { day: number; liters: number };
+export type HistorySeries = { current: HistoryPoint[]; previous: HistoryPoint[] };
 
-export function HistoryChart({ data }: { data: HistoryPoint[] | null }) {
+const AXIS_MAX_DAY = 31;
+
+export function HistoryChart({ data }: { data: HistorySeries | null }) {
   if (data === null) {
     return <p className="chart-empty">Cargando…</p>;
   }
 
-  const totalThisMonth = data.length > 0 ? data[data.length - 1].liters : 0;
+  const currentTotal = data.current.reduce((sum, d) => sum + d.liters, 0);
+  const previousTotal = data.previous.reduce((sum, d) => sum + d.liters, 0);
 
-  if (data.length === 0 || totalThisMonth === 0) {
-    return <p className="chart-empty">Sin datos este mes todavía</p>;
+  if (currentTotal === 0 && previousTotal === 0) {
+    return <p className="chart-empty">Sin datos todavía</p>;
   }
 
   const width = 280;
@@ -22,75 +26,105 @@ export function HistoryChart({ data }: { data: HistoryPoint[] | null }) {
   const plotWidth = width - marginLeft - marginRight;
   const plotHeight = height - marginTop - marginBottom;
 
-  const maxLiters = Math.max(...data.map((d) => d.liters), 0.01);
+  const maxLiters = Math.max(
+    ...data.current.map((d) => d.liters),
+    ...data.previous.map((d) => d.liters),
+    0.01
+  );
   const midLiters = maxLiters / 2;
-  const minDay = data[0].day;
-  const maxDay = data[data.length - 1].day;
 
   const xFor = (day: number) =>
-    marginLeft +
-    (maxDay > minDay ? ((day - minDay) / (maxDay - minDay)) * plotWidth : plotWidth / 2);
+    marginLeft + ((day - 1) / (AXIS_MAX_DAY - 1)) * plotWidth;
   const yFor = (liters: number) =>
     marginTop + plotHeight - (liters / maxLiters) * plotHeight;
 
-  const points = data
-    .map((d) => `${xFor(d.day).toFixed(1)},${yFor(d.liters).toFixed(1)}`)
-    .join(" ");
+  const toPoints = (series: HistoryPoint[]) =>
+    series.map((d) => `${xFor(d.day).toFixed(1)},${yFor(d.liters).toFixed(1)}`).join(" ");
 
-  const last = data[data.length - 1];
-  const first = data[0];
+  const currentPoints = toPoints(data.current);
+  const previousPoints = toPoints(data.previous);
+  const showPrevious = previousTotal > 0;
+
+  const peakCurrent = data.current.reduce(
+    (best, d) => (!best || d.liters > best.liters ? d : best),
+    null as HistoryPoint | null
+  );
 
   return (
-    <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="100%">
-      {[0, midLiters, maxLiters].map((v, i) => (
-        <g key={i}>
-          <line
-            x1={marginLeft}
-            y1={yFor(v)}
-            x2={width - marginRight}
-            y2={yFor(v)}
-            stroke="#2a2c2e"
-            strokeWidth="1"
+    <div className="chart-container">
+      {showPrevious && (
+        <div className="chart-legend">
+          <span className="chart-legend-item">
+            <span className="chart-swatch chart-swatch-current" />
+            Este mes
+          </span>
+          <span className="chart-legend-item">
+            <span className="chart-swatch chart-swatch-previous" />
+            Mes anterior
+          </span>
+        </div>
+      )}
+      <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="100%">
+        {[0, midLiters, maxLiters].map((v, i) => (
+          <g key={i}>
+            <line
+              x1={marginLeft}
+              y1={yFor(v)}
+              x2={width - marginRight}
+              y2={yFor(v)}
+              stroke="#2a2c2e"
+              strokeWidth="1"
+            />
+            <text x={marginLeft - 5} y={yFor(v) + 3} fontSize="8" fill="#888" textAnchor="end">
+              {v.toFixed(1)}
+            </text>
+          </g>
+        ))}
+
+        <text x={xFor(1)} y={height - 3} fontSize="8" fill="#888" textAnchor="start">
+          día 1
+        </text>
+        <text x={xFor(AXIS_MAX_DAY)} y={height - 3} fontSize="8" fill="#888" textAnchor="end">
+          día 31
+        </text>
+
+        {showPrevious && (
+          <polyline
+            points={previousPoints}
+            fill="none"
+            stroke="#ef5b25"
+            strokeWidth="2"
+            strokeDasharray="4 3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           />
-          <text x={marginLeft - 5} y={yFor(v) + 3} fontSize="8" fill="#888" textAnchor="end">
-            {v.toFixed(1)}
-          </text>
-        </g>
-      ))}
+        )}
 
-      <text x={xFor(first.day)} y={height - 3} fontSize="8" fill="#888" textAnchor="start">
-        día {first.day}
-      </text>
-      <text
-        x={xFor(last.day)}
-        y={height - 3}
-        fontSize="8"
-        fill="#888"
-        textAnchor="end"
-      >
-        día {last.day}
-      </text>
+        <polyline
+          points={currentPoints}
+          fill="none"
+          stroke="#f2b705"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
 
-      <polyline
-        points={points}
-        fill="none"
-        stroke="#f2b705"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      <circle cx={xFor(last.day)} cy={yFor(last.liters)} r="3.5" fill="#f2b705" />
-      <text
-        x={Math.min(xFor(last.day), width - marginRight - 4)}
-        y={Math.max(yFor(last.liters) - 8, marginTop + 8)}
-        fontSize="11"
-        fontWeight="700"
-        fill="#f2b705"
-        textAnchor="end"
-      >
-        {last.liters.toFixed(2)}L
-      </text>
-    </svg>
+        {peakCurrent && peakCurrent.liters > 0 && (
+          <>
+            <circle cx={xFor(peakCurrent.day)} cy={yFor(peakCurrent.liters)} r="3.5" fill="#f2b705" />
+            <text
+              x={Math.min(xFor(peakCurrent.day), width - marginRight - 4)}
+              y={Math.max(yFor(peakCurrent.liters) - 8, marginTop + 8)}
+              fontSize="11"
+              fontWeight="700"
+              fill="#f2b705"
+              textAnchor="end"
+            >
+              {peakCurrent.liters.toFixed(2)}L (día {peakCurrent.day})
+            </text>
+          </>
+        )}
+      </svg>
+    </div>
   );
 }

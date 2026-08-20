@@ -4,6 +4,28 @@ import { getMadridDateParts } from "@/lib/madridTime";
 
 export const dynamic = "force-dynamic";
 
+function buildSeries(
+  entries: { liters: number; createdAt: Date }[],
+  year: number,
+  month: number,
+  maxDay: number
+) {
+  const perDay = new Array(maxDay + 1).fill(0);
+
+  for (const e of entries) {
+    const p = getMadridDateParts(new Date(e.createdAt));
+    if (p.year === year && p.month === month && p.day <= maxDay) {
+      perDay[p.day] += e.liters;
+    }
+  }
+
+  const data = [];
+  for (let day = 1; day <= maxDay; day++) {
+    data.push({ day, liters: Number(perDay[day].toFixed(2)) });
+  }
+  return data;
+}
+
 export async function GET(
   req: NextRequest,
   { params }: { params: { id: string } }
@@ -30,21 +52,17 @@ export async function GET(
   }
 
   const now = getMadridDateParts(new Date());
-  const perDay = new Array(now.day + 1).fill(0);
 
-  for (const e of entries) {
-    const p = getMadridDateParts(new Date(e.createdAt));
-    if (p.year === now.year && p.month === now.month && p.day <= now.day) {
-      perDay[p.day] += e.liters;
-    }
+  let prevMonth = now.month - 1;
+  let prevYear = now.year;
+  if (prevMonth < 0) {
+    prevMonth = 11;
+    prevYear -= 1;
   }
+  const daysInPrevMonth = new Date(prevYear, prevMonth + 1, 0).getDate();
 
-  let cumulative = 0;
-  const data = [];
-  for (let day = 1; day <= now.day; day++) {
-    cumulative += perDay[day];
-    data.push({ day, liters: Number(cumulative.toFixed(2)) });
-  }
+  const current = buildSeries(entries, now.year, now.month, now.day);
+  const previous = buildSeries(entries, prevYear, prevMonth, daysInPrevMonth);
 
-  return NextResponse.json({ data });
+  return NextResponse.json({ current, previous });
 }
