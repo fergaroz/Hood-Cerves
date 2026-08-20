@@ -9,6 +9,14 @@ export const ANIMATE_MESSAGES = [
   "Vamos a por una birra mas grande que la cabeza del Tati",
   "No seeeee brooo ¿Una cerve?",
   "Seguro que Preci está en el Mayri",
+  "Musho gay, eso es lo que hay",
+  "Sois pura decepción",
+  "Hoy puede ser el mejor día de mi vida",
+  "Un 4.3, esto solo se soluciona con birra",
+  "No seeeee brooo ¿Una cerve?",
+  "Venga chico invitadme a una",
+  "Me fumo y me bebo",
+  "A bebeeer cucarachaas 🪳"
 ];
 
 function currentDayName(): string {

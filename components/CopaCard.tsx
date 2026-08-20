@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { CiderGlass } from "./CiderGlass";
+import { FlipCard } from "./FlipCard";
+import { HistoryChart, type HistoryPoint } from "./HistoryChart";
 import { getCurrentBadge, getImparableLevel, toRomanNumeral } from "@/lib/badges";
 import { CUBATA_QUICK_SIZES } from "@/lib/quickSizes";
 import type { PersonWithTotal } from "@/lib/types";
@@ -27,6 +29,7 @@ export function CopaCard({
 }) {
   const [customLiters, setCustomLiters] = useState("");
   const [busy, setBusy] = useState(false);
+  const [history, setHistory] = useState<HistoryPoint[] | null>(null);
 
   const ratio = maxLiters > 0 ? person.monthCubataLiters / maxLiters : 0;
   const badge = getCurrentBadge(person.monthCubataLiters);
@@ -69,86 +72,108 @@ export function CopaCard({
     await onDelete(person.id);
   }
 
+  async function loadHistory() {
+    setHistory(null);
+    const res = await fetch(`/api/people/${person.id}/history?type=cubata`);
+    if (res.ok) {
+      const json = await res.json();
+      setHistory(json.data);
+    }
+  }
+
   return (
-    <div className="person-card">
-      <div className="jar-col">
-        <button className="delete-x" onClick={handleDelete} aria-label="Eliminar">
-          ✕
-        </button>
-        <CiderGlass ratio={ratio} />
-        <span className="rank-number">#{rank}</span>
-      </div>
-      <div className="info-col">
-        <div className="card-header-row">
-          <p className="person-name">
-            {person.name}
-            {isLeader && <span className="crown">🐐</span>}
-            {isLast && <span className="crown">🏳️‍🌈</span>}
-          </p>
-          <span className="lifetime-badge" title="Total histórico">
-            Total {person.totalCubataLiters.toFixed(2)}L
-          </span>
-        </div>
-        {badge && <p className="rank-badge">{badge.name}</p>}
-        {imparableLevel > 0 && (
-          <p className="rank-badge imparable-badge">
-            Imparable {toRomanNumeral(imparableLevel)}
-          </p>
-        )}
-        <p className="person-total">
-          {person.monthCubataLiters.toFixed(2)} L
-          <span className="person-total-label">Este mes</span>
-        </p>
-
-        <div className="quick-buttons">
-          {CUBATA_QUICK_SIZES.map((size) => (
-            <button
-              key={size.label}
-              disabled={busy}
-              onClick={() => addCubata(size.liters, size.label)}
-            >
-              {size.label} ({size.liters}L)
+    <FlipCard
+      onShowBack={loadHistory}
+      front={
+        <>
+          <div className="jar-col">
+            <button className="delete-x" onClick={handleDelete} aria-label="Eliminar">
+              ✕
             </button>
-          ))}
-        </div>
+            <CiderGlass ratio={ratio} />
+            <span className="rank-number">#{rank}</span>
+          </div>
+          <div className="info-col">
+            <div className="card-header-row">
+              <p className="person-name">
+                {person.name}
+                {isLeader && <span className="crown">🐐</span>}
+                {isLast && <span className="crown">🏳️‍🌈</span>}
+              </p>
+              <span className="lifetime-badge" title="Total histórico">
+                Total {person.totalCubataLiters.toFixed(2)}L
+              </span>
+            </div>
+            {badge && <p className="rank-badge">{badge.name}</p>}
+            {imparableLevel > 0 && (
+              <p className="rank-badge imparable-badge">
+                Imparable {toRomanNumeral(imparableLevel)}
+              </p>
+            )}
+            <p className="person-total">
+              {person.monthCubataLiters.toFixed(2)} L
+              <span className="person-total-label">Este mes</span>
+            </p>
 
-        <div className="custom-amount">
-          <input
-            type="number"
-            step="0.01"
-            min="0"
-            placeholder="0.25"
-            value={customLiters}
-            onChange={(e) => setCustomLiters(e.target.value)}
-          />
-          <button disabled={busy || !customLiters} onClick={handleCustomAdd}>
-            + L
-          </button>
-        </div>
+            <div className="quick-buttons">
+              {CUBATA_QUICK_SIZES.map((size) => (
+                <button
+                  key={size.label}
+                  disabled={busy}
+                  onClick={() => addCubata(size.liters, size.label)}
+                >
+                  {size.label} ({size.liters}L)
+                </button>
+              ))}
+            </div>
 
-        <div className="card-actions">
-          <button
-            className="link-btn undo"
-            disabled={busy || !person.lastCubataId}
-            onClick={handleUndo}
-          >
-            <svg
-              viewBox="0 0 24 24"
-              width="14"
-              height="14"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M9 14 4 9l5-5" />
-              <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
-            </svg>
-            Deshacer última
-          </button>
+            <div className="custom-amount">
+              <input
+                type="number"
+                step="0.01"
+                min="0"
+                placeholder="0.25"
+                value={customLiters}
+                onChange={(e) => setCustomLiters(e.target.value)}
+              />
+              <button disabled={busy || !customLiters} onClick={handleCustomAdd}>
+                + L
+              </button>
+            </div>
+
+            <div className="card-actions">
+              <button
+                className="link-btn undo"
+                disabled={busy || !person.lastCubataId}
+                onClick={handleUndo}
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  width="14"
+                  height="14"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M9 14 4 9l5-5" />
+                  <path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11" />
+                </svg>
+                Deshacer última
+              </button>
+            </div>
+          </div>
+        </>
+      }
+      back={
+        <div className="chart-back">
+          <p className="chart-title">Evolución de {person.name} — este mes</p>
+          <div className="chart-wrap">
+            <HistoryChart data={history} />
+          </div>
         </div>
-      </div>
-    </div>
+      }
+    />
   );
 }
