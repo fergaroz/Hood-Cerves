@@ -203,9 +203,6 @@ export default function Home() {
     people.map((p) => ({ name: p.name, liters: p.monthPoints }))
   );
 
-  const totalPointsGroup = people.reduce((sum, p) => sum + p.totalPoints, 0);
-  const monthPointsGroup = people.reduce((sum, p) => sum + p.monthPoints, 0);
-
   const pointsRanked = [...people]
     .sort((a, b) => b.monthPoints - a.monthPoints)
     .map((person) => ({
@@ -396,9 +393,10 @@ export default function Home() {
       {tab === "puntos" && (
         <>
           <p className="points-explainer">
-            Puntuación aparte de los litros reales de cerveza: cuenta lo mismo
-            salvo cuando hay un evento temático activo, que da puntos extra.
-            No afecta al total de litros.
+            Puntuación aparte de los litros reales de cerveza: cada 100 mL
+            bebidos son 1 punto (un tercio, 3,3 pts; una litrona, 10 pts), y
+            durante los eventos temáticos esos puntos se multiplican. No
+            afecta al total de litros.
           </p>
 
           {activeEvent && (
@@ -413,13 +411,6 @@ export default function Home() {
               </div>
             </div>
           )}
-
-          <TotalCounter totalLiters={totalPointsGroup} label="Puntuación total" unit="pts" />
-          <TotalCounter
-            totalLiters={monthPointsGroup}
-            label="Puntuación este mes"
-            unit="pts"
-          />
 
           <Podium entries={pointsPodium} unit=" pts" />
 
