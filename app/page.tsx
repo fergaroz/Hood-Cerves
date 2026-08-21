@@ -394,9 +394,10 @@ export default function Home() {
         <>
           <p className="points-explainer">
             Puntuación aparte de los litros reales de cerveza: cada 100 mL
-            bebidos son 1 punto (un tercio, 3,3 pts; una litrona, 10 pts), y
-            durante los eventos temáticos esos puntos se multiplican. No
-            afecta al total de litros.
+            bebidos son 1 punto, redondeado siempre hacia abajo (un tercio,
+            3 pts; una litrona, 10 pts), y durante los eventos temáticos esos
+            puntos se multiplican. Se reinician cada mes. No afecta al total
+            de litros.
           </p>
 
           {activeEvent && (
@@ -412,7 +413,7 @@ export default function Home() {
             </div>
           )}
 
-          <Podium entries={pointsPodium} unit=" pts" />
+          <Podium entries={pointsPodium} unit=" pts" decimals={0} />
 
           {loaded && people.length === 0 && (
             <p className="empty-state">Nadie apuntado todavía. ¡Añade a alguien!</p>
