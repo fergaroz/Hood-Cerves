@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { broadcastPush } from "@/lib/push";
-import { getPointsMultiplier, POINTS_PER_LITER } from "@/lib/events";
+import { computeRawPoints, litersToPoints } from "@/lib/points";
 import { getMadridDateParts } from "@/lib/madridTime";
 
 export const dynamic = "force-dynamic";
@@ -56,25 +56,51 @@ export async function GET(req: NextRequest) {
   const end = new Date(now.getFullYear(), now.getMonth(), 1);
   const monthName = MONTH_NAMES[start.getMonth()];
 
-  const drinks = await prisma.drink.findMany({
-    where: { createdAt: { gte: start, lt: end } },
-    include: { person: true },
-  });
+  const [drinks, cubatas, sidras, steals] = await Promise.all([
+    prisma.drink.findMany({
+      where: { createdAt: { gte: start, lt: end } },
+      include: { person: true },
+    }),
+    prisma.cubata.findMany({
+      where: { createdAt: { gte: start, lt: end } },
+      include: { person: true },
+    }),
+    prisma.sidra.findMany({
+      where: { createdAt: { gte: start, lt: end } },
+      include: { person: true },
+    }),
+    prisma.pointSteal.findMany({
+      where: { createdAt: { gte: start, lt: end } },
+    }),
+  ]);
 
-  if (drinks.length === 0) {
+  const allEntries = [...drinks, ...cubatas, ...sidras];
+
+  if (allEntries.length === 0) {
     return NextResponse.json({ ok: true, sent: false, reason: "Sin bebidas ese mes" });
   }
 
-  const pointsByPerson = new Map<string, { name: string; points: number }>();
-  for (const d of drinks) {
-    const entry = pointsByPerson.get(d.personId) ?? { name: d.person.name, points: 0 };
-    entry.points += d.liters * getPointsMultiplier(d.createdAt);
-    pointsByPerson.set(d.personId, entry);
+  const byPerson = new Map<
+    string,
+    { name: string; entries: { liters: number; createdAt: Date }[] }
+  >();
+  for (const e of allEntries) {
+    const entry = byPerson.get(e.personId) ?? { name: e.person.name, entries: [] };
+    entry.entries.push({ liters: e.liters, createdAt: e.createdAt });
+    byPerson.set(e.personId, entry);
   }
 
-  const ranking = Array.from(pointsByPerson.values())
-    .map((r) => ({ name: r.name, points: Math.floor(r.points * POINTS_PER_LITER) }))
-    .sort((a, b) => b.points - a.points);
+  const ranking = Array.from(byPerson.entries()).map(([personId, data]) => {
+    const stolenIn = steals
+      .filter((s) => s.toPersonId === personId)
+      .reduce((sum, s) => sum + s.points, 0);
+    const stolenOut = steals
+      .filter((s) => s.fromPersonId === personId)
+      .reduce((sum, s) => sum + s.points, 0);
+    const points = litersToPoints(computeRawPoints(data.entries)) + stolenIn - stolenOut;
+    return { name: data.name, points };
+  });
+  ranking.sort((a, b) => b.points - a.points);
 
   const distinctScores = Array.from(new Set(ranking.map((r) => r.points))).sort(
     (a, b) => b - a
@@ -101,11 +127,11 @@ export async function GET(req: NextRequest) {
   await broadcastPush({ title: "Hood Cerves - Resumen mensual", body });
 
   const dayMap = new Map<string, { day: number; month: number; liters: number }>();
-  for (const d of drinks) {
-    const { month, day } = getMadridDateParts(new Date(d.createdAt));
+  for (const e of allEntries) {
+    const { month, day } = getMadridDateParts(new Date(e.createdAt));
     const key = `${month}-${day}`;
     const entry = dayMap.get(key) ?? { day, month, liters: 0 };
-    entry.liters += d.liters;
+    entry.liters += e.liters;
     dayMap.set(key, entry);
   }
 

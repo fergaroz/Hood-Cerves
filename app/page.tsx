@@ -9,6 +9,7 @@ import { PersonCard } from "@/components/PersonCard";
 import { PointsBoard } from "@/components/PointsBoard";
 import { Podium, type PodiumEntry } from "@/components/Podium";
 import { SidraCard } from "@/components/SidraCard";
+import { StealModal } from "@/components/StealModal";
 import { TotalCounter } from "@/components/TotalCounter";
 import { getActiveEvent, type WeeklyEvent } from "@/lib/events";
 import { formatMadridTime, madridWallClockToUtc } from "@/lib/madridTime";
@@ -42,14 +43,40 @@ export default function Home() {
   const [tab, setTab] = useState<"cerveza" | "copas" | "sidra" | "puntos">("cerveza");
   const [sidraUnlocked, setSidraUnlocked] = useState(false);
   const [activeEvent, setActiveEvent] = useState<WeeklyEvent | null>(null);
+  const [stealPrompt, setStealPrompt] = useState<{
+    fromPersonId: string;
+    fromPersonName: string;
+    points: number;
+  } | null>(null);
+  const [stealActive, setStealActive] = useState(false);
+  const [stealEndsAt, setStealEndsAt] = useState<Date | null>(null);
 
   const refresh = useCallback(async () => {
     const res = await fetch("/api/people", { cache: "no-store" });
-    if (!res.ok) return;
+    if (!res.ok) return null;
     const data: PersonWithTotal[] = await res.json();
     setPeople(data);
     setLoaded(true);
+    return data;
   }, []);
+
+  async function maybeOfferSteal(
+    personId: string,
+    res: Response,
+    freshPeople: PersonWithTotal[]
+  ) {
+    if (!res.ok || !stealActive) return;
+    const data = await res.json().catch(() => null);
+    const points = data?.pointsEarned;
+    if (!points || points <= 0) return;
+
+    const person = freshPeople.find((p) => p.id === personId);
+    setStealPrompt({
+      fromPersonId: personId,
+      fromPersonName: person?.name ?? "Alguien",
+      points,
+    });
+  }
 
   useEffect(() => {
     refresh();
@@ -76,6 +103,19 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const check = async () => {
+      const res = await fetch("/api/steal/status", { cache: "no-store" });
+      if (!res.ok) return;
+      const data = await res.json();
+      setStealActive(Boolean(data.active));
+      setStealEndsAt(data.endsAt ? new Date(data.endsAt) : null);
+    };
+    check();
+    const interval = setInterval(check, 8000);
+    return () => clearInterval(interval);
+  }, []);
+
   async function handleAdd(name: string) {
     await fetch("/api/people", {
       method: "POST",
@@ -86,12 +126,13 @@ export default function Home() {
   }
 
   async function handleDrink(personId: string, liters: number, label?: string) {
-    await fetch(`/api/people/${personId}/drink`, {
+    const res = await fetch(`/api/people/${personId}/drink`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ liters, label }),
     });
-    await refresh();
+    const freshPeople = await refresh();
+    await maybeOfferSteal(personId, res, freshPeople ?? people);
   }
 
   async function handleUndo(personId: string) {
@@ -100,12 +141,13 @@ export default function Home() {
   }
 
   async function handleCubataAdd(personId: string, liters: number, label?: string) {
-    await fetch(`/api/people/${personId}/cubata`, {
+    const res = await fetch(`/api/people/${personId}/cubata`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ liters, label }),
     });
-    await refresh();
+    const freshPeople = await refresh();
+    await maybeOfferSteal(personId, res, freshPeople ?? people);
   }
 
   async function handleCubataUndo(personId: string) {
@@ -114,12 +156,13 @@ export default function Home() {
   }
 
   async function handleSidraAdd(personId: string, liters: number, label?: string) {
-    await fetch(`/api/people/${personId}/sidra`, {
+    const res = await fetch(`/api/people/${personId}/sidra`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ liters, label }),
     });
-    await refresh();
+    const freshPeople = await refresh();
+    await maybeOfferSteal(personId, res, freshPeople ?? people);
   }
 
   async function handleSidraUndo(personId: string) {
@@ -213,8 +256,13 @@ export default function Home() {
       ),
     }));
 
+  const stealMinutesLeft = stealEndsAt
+    ? Math.max(1, Math.ceil((stealEndsAt.getTime() - Date.now()) / 60000))
+    : 0;
+
   return (
-    <main>
+    <main className={stealActive ? "steal-mode" : ""}>
+      {stealActive && <div className="steal-vignette" />}
       <header className="app-header">
         <div className="logo-circle">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -254,6 +302,18 @@ export default function Home() {
           🏆 Puntos
         </button>
       </div>
+
+      {stealActive && (
+        <div className="steal-banner">
+          <span className="steal-banner-emoji">🚨</span>
+          <div>
+            <p className="steal-banner-title">¡Hora de robos activa!</p>
+            <p className="steal-banner-detail">
+              Quedan {stealMinutesLeft} min — cuidado con tus puntos.
+            </p>
+          </div>
+        </div>
+      )}
 
       {tab === "cerveza" && (
         <>
@@ -393,11 +453,11 @@ export default function Home() {
       {tab === "puntos" && (
         <>
           <p className="points-explainer">
-            Puntuación aparte de los litros reales de cerveza: cada 100 mL
-            bebidos son 1 punto, redondeado siempre hacia abajo (un tercio,
-            3 pts; una litrona, 10 pts), y durante los eventos temáticos esos
-            puntos se multiplican. Se reinician cada mes. No afecta al total
-            de litros.
+            Puntuación aparte de los litros reales: cada 100 mL bebidos
+            (cerveza, cubata o sidra) son 1 punto, redondeado siempre hacia
+            abajo (un tercio, 3 pts; una litrona, 10 pts), y durante los
+            eventos temáticos esos puntos se multiplican. Se reinician cada
+            mes. No afecta al total de litros.
           </p>
 
           {activeEvent && (
@@ -421,6 +481,19 @@ export default function Home() {
 
           <PointsBoard entries={pointsRanked} />
         </>
+      )}
+
+      {stealPrompt && (
+        <StealModal
+          fromPersonId={stealPrompt.fromPersonId}
+          fromPersonName={stealPrompt.fromPersonName}
+          points={stealPrompt.points}
+          people={people}
+          onDone={() => {
+            setStealPrompt(null);
+            refresh();
+          }}
+        />
       )}
     </main>
   );
